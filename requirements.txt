@@ -5,3 +5,5 @@ python-dotenv==1.2.2
 gunicorn==23.0.0
 whitenoise==6.9.0
 requests==2.34.2
+PyJWT==2.13.0
+cryptography==49.0.0
