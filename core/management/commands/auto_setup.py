@@ -2,14 +2,27 @@ import os
 from django.core.management.base import BaseCommand
 from django.core.management import call_command
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 
 
 class Command(BaseCommand):
-    help = 'Run migrations and create default admin user'
+    help = 'Run migrations, create site, and create default admin user'
 
     def handle(self, *args, **options):
         self.stdout.write('Running migrations...')
         call_command('migrate', '--noinput')
+
+        self.stdout.write('Ensuring site exists...')
+        site, _ = Site.objects.get_or_create(
+            id=1,
+            defaults={
+                'domain': os.getenv('RENDER_EXTERNAL_HOSTNAME', 'localhost'),
+                'name': 'SMS Pro',
+            }
+        )
+        site.domain = os.getenv('RENDER_EXTERNAL_HOSTNAME', 'localhost')
+        site.name = 'SMS Pro'
+        site.save()
 
         User = get_user_model()
         if not User.objects.filter(username='admin').exists():
