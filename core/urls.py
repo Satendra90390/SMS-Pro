@@ -1,10 +1,12 @@
 from django.urls import path
 from . import views
+from .chat_views import chat_api
 
 app_name = 'core'
 
 urlpatterns = [
     path('', views.dashboard_router, name='dashboard'),
+    path('chat/', chat_api, name='chat_api'),
     path('admin/', views.admin_dashboard, name='admin_dashboard'),
     path('admin/students/', views.admin_students, name='admin_students'),
     path('admin/students/add/', views.admin_add_student, name='admin_add_student'),
