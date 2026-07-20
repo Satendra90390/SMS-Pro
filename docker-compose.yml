@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: sms_pro
+      POSTGRES_USER: sms_admin
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme_in_production}
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgres://sms_admin:${DB_PASSWORD:-changeme_in_production}@db:5432/sms_pro
+
+volumes:
+  pgdata:
