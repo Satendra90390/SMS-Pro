@@ -16,6 +16,6 @@ COPY . .
 
 RUN python manage.py collectstatic --noinput 2>/dev/null || true
 
-EXPOSE 8000
+EXPOSE $PORT
 
-CMD ["gunicorn", "sms_django.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--threads", "2"]
+CMD gunicorn sms_django.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 3 --threads 2
