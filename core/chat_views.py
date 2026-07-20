@@ -1,12 +1,16 @@
 import json
 import os
+import requests
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Count, Q
+from django.db.models import Sum
 from .models import (
     Student, Faculty, Course, Attendance, Result, Fee,
-    StudentCourse, FacultyTeaching,
+    FacultyTeaching,
 )
+
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_MODEL = "llama-3.1-8b-instant"
 
 
 def build_context(user):
@@ -28,7 +32,7 @@ def build_context(user):
             f"You are an AI assistant for '{inst.name}' (SMS Pro). "
             f"Current stats: {student_count} students, {faculty_count} faculty, "
             f"{course_count} courses, {rate}% attendance rate, "
-            f"₹{collected:,} collected of ₹{total:,} total fees, "
+            f"Rs {collected:,} collected of Rs {total:,} total fees, "
             f"{failed} students with failing grades."
         )
 
@@ -91,22 +95,38 @@ def chat_api(request):
     if not user_message:
         return JsonResponse({'error': 'Message is required'}, status=400)
 
-    api_key = os.getenv('GEMINI_API_KEY', '')
+    api_key = os.getenv('GROQ_API_KEY', '')
     if not api_key:
-        return JsonResponse({'error': 'AI is not configured. Ask admin to set GEMINI_API_KEY.'}, status=500)
+        return JsonResponse({'error': 'AI is not configured.'}, status=500)
 
     system_prompt = build_context(request.user)
     history = data.get('history', [])
 
+    messages = [{"role": "system", "content": system_prompt + "\nKeep responses concise and helpful. Use bullet points when listing data. You are part of SMS Pro - a student management system. Only answer questions related to the institution, students, academics, or SMS Pro features. Politely redirect unrelated questions."}]
+
+    for msg in history:
+        role = 'user' if msg.get('role') == 'user' else 'assistant'
+        parts = msg.get('parts', [])
+        text = parts[0].get('text', '') if parts else ''
+        messages.append({"role": role, "content": text})
+
+    messages.append({"role": "user", "content": user_message})
+
     try:
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(
-            model_name='gemini-1.5-flash',
-            system_instruction=system_prompt + "\nKeep responses concise and helpful. Use bullet points when listing data. You are part of SMS Pro — a student management system. Only answer questions related to the institution, students, academics, or SMS Pro features. Politely redirect unrelated questions."
+        resp = requests.post(
+            GROQ_URL,
+            json={"model": GROQ_MODEL, "messages": messages, "temperature": 0.7, "max_tokens": 1024},
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            timeout=30,
         )
-        chat = model.start_chat(history=history)
-        response = chat.send_message(user_message)
-        return JsonResponse({'reply': response.text})
+        result = resp.json()
+
+        if 'choices' in result and result['choices']:
+            text = result['choices'][0]['message']['content']
+            return JsonResponse({'reply': text})
+        elif 'error' in result:
+            return JsonResponse({'error': f"AI error: {result['error'].get('message', 'Unknown')}"}, status=500)
+        else:
+            return JsonResponse({'error': 'No response from AI.'}, status=500)
     except Exception as e:
         return JsonResponse({'error': f'AI error: {str(e)}'}, status=500)
