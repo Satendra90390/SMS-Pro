@@ -15,9 +15,5 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         if user:
             sociallogin.connect(request, user)
 
-    def on_user_created(self, request, sociallogin, **kwargs):
+    def on_user_signed_up(self, request, sociallogin, **kwargs):
         request.session['oauth_new'] = True
-
-    def post_social_login(self, request, sociallogin):
-        if sociallogin.is_new:
-            request.session['oauth_new'] = True
