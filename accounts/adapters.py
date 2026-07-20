@@ -1,5 +1,4 @@
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
-from django.shortcuts import redirect
 
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -15,3 +14,10 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         user = User.objects.filter(email=email).first()
         if user:
             sociallogin.connect(request, user)
+
+    def on_user_created(self, request, sociallogin, **kwargs):
+        request.session['oauth_new'] = True
+
+    def post_social_login(self, request, sociallogin):
+        if sociallogin.is_new:
+            request.session['oauth_new'] = True

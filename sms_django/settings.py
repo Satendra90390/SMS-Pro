@@ -119,6 +119,9 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
+SOCIALACCOUNT_ADAPTER = 'accounts.adapters.CustomSocialAccountAdapter'
+SOCIALACCOUNT_LOGIN_REDIRECT_URL = '/accounts/role-select/'
+
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {

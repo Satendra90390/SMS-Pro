@@ -32,6 +32,21 @@ def logout_view(request):
     return redirect('accounts:login')
 
 
+@login_required
+def role_select(request):
+    user = request.user
+    if not request.session.pop('oauth_new', False):
+        return redirect('core:dashboard')
+    if request.method == 'POST':
+        role = request.POST.get('role', '')
+        if role in ['admin', 'faculty', 'student', 'parent']:
+            user.role = role
+            user.save()
+            return redirect('core:dashboard')
+        messages.error(request, 'Please select a valid role.')
+    return render(request, 'accounts/role_select.html')
+
+
 def register_institution(request):
     if request.method == 'POST':
         inst_name = request.POST.get('inst_name', '').strip()
