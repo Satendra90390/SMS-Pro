@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Exam Results — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/faculty_sidebar.html' with active='exams' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>{{ exam.title }}</h1>
+                <div class="subtitle">{{ exam.course.name }} | {{ exam.subject|default:"" }} | Pass: {{ exam.passing_marks }}/{{ exam.total_marks }}</div>
+            </div>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="users" style="width:22px;height:22px;"></i></div>
+                <div class="stat-info"><div class="stat-val">{{ results.count }}</div><div class="stat-label">Results Entered</div></div>
+            </div>
+        </div>
+
+        {% if available_students %}
+        <div class="card" style="max-width:600px;margin-bottom:20px;">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="plus-circle" style="width:18px;height:18px;"></i> Add Result</div>
+            </div>
+            <form method="POST" class="auth-form">{% csrf_token %}
+                <input type="hidden" name="action" value="add">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Student</label>
+                        <select name="student_id" required style="width:100%;padding:10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--r-sm);color:var(--text-primary);font-size:14px;">
+                            <option value="">Select student</option>
+                            {% for s in available_students %}
+                            <option value="{{ s.id }}">{{ s.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Marks (out of {{ exam.total_marks }})</label>
+                        <input type="number" name="marks" min="0" max="{{ exam.total_marks }}" step="0.01" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Remarks</label>
+                    <input type="text" name="remarks" placeholder="Optional remarks">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Result</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="list" style="width:18px;height:18px;"></i> Results</div>
+            </div>
+            {% if results %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Student</th><th>Marks</th><th>Status</th><th>Remarks</th><th>Action</th></tr></thead>
+                    <tbody>
+                    {% for r in results %}
+                    <tr>
+                        <td><strong>{{ r.student.name }}</strong></td>
+                        <td>{{ r.marks }} / {{ exam.total_marks }}</td>
+                        <td>
+                            {% if r.is_pass %}
+                            <span class="badge badge-green">Pass</span>
+                            {% else %}
+                            <span class="badge badge-red">Fail</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ r.remarks|default:"—" }}</td>
+                        <td>
+                            <form method="POST" style="display:inline;" onsubmit="return confirm('Delete?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="result_id" value="{{ r.id }}">
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon"><i data-lucide="clipboard" style="width:40px;height:40px;"></i></div>
+                <h3>No Results</h3>
+                <p>Add results for students enrolled in this course.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

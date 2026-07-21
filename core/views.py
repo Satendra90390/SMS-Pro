@@ -6,6 +6,7 @@ from datetime import date, timedelta
 from .models import (
     Institution, Student, Faculty, Course, FacultyTeaching,
     StudentCourse, Result, Attendance, Fee, Parent, AuditLog,
+    Exam, ExamResult, Book, BookIssue, Event,
 )
 from accounts.models import User
 
@@ -46,6 +47,9 @@ def admin_dashboard(request):
         'absent_count': Attendance.objects.filter(institution=inst, status='Absent').count(),
         'fees_collected': Fee.objects.filter(institution=inst, status='Paid').aggregate(total=Sum('amount'))['total'] or 0,
         'total_fees': Fee.objects.filter(institution=inst).values('status').annotate(total=Sum('amount')),
+        'exam_count': Exam.objects.filter(institution=inst).count(),
+        'book_count': Book.objects.filter(institution=inst).count(),
+        'event_count': Event.objects.filter(institution=inst).count(),
         'institution': inst,
     }
     return render(request, 'admin_panel/dashboard.html', ctx)
@@ -365,3 +369,383 @@ def accountant_collections(request):
     return render(request, 'accountant/collections.html', {
         'fees': fees, 'total': total, 'by_type': by_type,
     })
+
+
+# ─── EXAM VIEWS ────────────────────────────────────────────────
+
+@login_required
+def admin_exams(request):
+    if request.user.role != 'admin':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    exams = Exam.objects.filter(institution=inst).select_related('course').order_by('-exam_date')
+    q = request.GET.get('q', '').strip()
+    if q:
+        exams = exams.filter(Q(title__icontains=q) | Q(course__name__icontains=q) | Q(subject__icontains=q))
+    if request.method == 'POST' and request.POST.get('delete_id'):
+        eid = request.POST.get('delete_id')
+        try:
+            e = Exam.objects.get(pk=eid, institution=inst)
+            log_audit(request.user, 'delete_exam', f"Deleted exam {e.title}", 'exams')
+            e.delete()
+            messages.success(request, 'Exam deleted.')
+        except Exam.DoesNotExist:
+            messages.error(request, 'Exam not found.')
+        return redirect('core:admin_exams')
+    return render(request, 'admin_panel/exams.html', {'exams': exams, 'q': q})
+
+
+@login_required
+def admin_add_exam(request):
+    if request.user.role != 'admin':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    courses = Course.objects.filter(institution=inst).order_by('name')
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        course_id = request.POST.get('course', '')
+        exam_type = request.POST.get('exam_type', 'Midterm')
+        subject = request.POST.get('subject', '').strip()
+        exam_date = request.POST.get('exam_date', '')
+        total_marks = request.POST.get('total_marks', 100)
+        passing_marks = request.POST.get('passing_marks', 40)
+        errors = []
+        if not title:
+            errors.append('Title is required.')
+        if not course_id:
+            errors.append('Course is required.')
+        if not exam_date:
+            errors.append('Exam date is required.')
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+            return render(request, 'admin_panel/add_exam.html', {'courses': courses})
+        course = get_object_or_404(Course, pk=course_id, institution=inst)
+        Exam.objects.create(
+            institution=inst, course=course, title=title,
+            exam_type=exam_type, subject=subject, exam_date=exam_date,
+            total_marks=int(total_marks), passing_marks=int(passing_marks),
+        )
+        log_audit(request.user, 'add_exam', f"Added exam {title}", 'exams')
+        messages.success(request, f'Exam "{title}" created.')
+        return redirect('core:admin_exams')
+    return render(request, 'admin_panel/add_exam.html', {'courses': courses})
+
+
+@login_required
+def admin_exam_results(request, exam_id):
+    if request.user.role != 'admin':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    exam = get_object_or_404(Exam, pk=exam_id, institution=inst)
+    results = ExamResult.objects.filter(exam=exam).select_related('student').order_by('student__name')
+    students_in_course = StudentCourse.objects.filter(course=exam.course, institution=inst).select_related('student')
+    existing_student_ids = results.values_list('student_id', flat=True)
+    available_students = [sc.student for sc in students_in_course if sc.student_id not in existing_student_ids]
+    if request.method == 'POST':
+        action = request.POST.get('action', '')
+        if action == 'add':
+            student_id = request.POST.get('student_id', '')
+            marks = request.POST.get('marks', 0)
+            remarks = request.POST.get('remarks', '').strip()
+            if student_id:
+                student = get_object_or_404(Student, pk=student_id, institution=inst)
+                ExamResult.objects.update_or_create(
+                    exam=exam, student=student,
+                    defaults={'marks': float(marks), 'remarks': remarks, 'institution': inst},
+                )
+                log_audit(request.user, 'add_exam_result', f"Added result for {student.name} in {exam.title}", 'exam_results')
+                messages.success(request, f'Result saved for {student.name}.')
+        elif action == 'delete':
+            rid = request.POST.get('result_id', '')
+            try:
+                r = ExamResult.objects.get(pk=rid, exam=exam, institution=inst)
+                log_audit(request.user, 'delete_exam_result', f"Deleted result for {r.student.name}", 'exam_results')
+                r.delete()
+                messages.success(request, 'Result deleted.')
+            except ExamResult.DoesNotExist:
+                messages.error(request, 'Result not found.')
+        return redirect('core:admin_exam_results', exam_id=exam.id)
+    return render(request, 'admin_panel/exam_results.html', {
+        'exam': exam, 'results': results, 'available_students': available_students,
+    })
+
+
+@login_required
+def faculty_exams(request):
+    if request.user.role != 'faculty':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    try:
+        faculty_obj = Faculty.objects.get(user=request.user, institution=inst)
+    except Faculty.DoesNotExist:
+        faculty_obj = None
+    if faculty_obj:
+        teaching_course_ids = faculty_obj.teachings.values_list('course_id', flat=True)
+        exams = Exam.objects.filter(institution=inst, course_id__in=teaching_course_ids).select_related('course')
+    else:
+        exams = Exam.objects.none()
+    return render(request, 'faculty/exams.html', {'exams': exams})
+
+
+@login_required
+def faculty_exam_results(request, exam_id):
+    if request.user.role != 'faculty':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    exam = get_object_or_404(Exam, pk=exam_id, institution=inst)
+    results = ExamResult.objects.filter(exam=exam).select_related('student').order_by('student__name')
+    students_in_course = StudentCourse.objects.filter(course=exam.course, institution=inst).select_related('student')
+    existing_student_ids = results.values_list('student_id', flat=True)
+    available_students = [sc.student for sc in students_in_course if sc.student_id not in existing_student_ids]
+    if request.method == 'POST':
+        action = request.POST.get('action', '')
+        if action == 'add':
+            student_id = request.POST.get('student_id', '')
+            marks = request.POST.get('marks', 0)
+            remarks = request.POST.get('remarks', '').strip()
+            if student_id:
+                student = get_object_or_404(Student, pk=student_id, institution=inst)
+                ExamResult.objects.update_or_create(
+                    exam=exam, student=student,
+                    defaults={'marks': float(marks), 'remarks': remarks, 'institution': inst},
+                )
+                messages.success(request, f'Result saved for {student.name}.')
+        elif action == 'delete':
+            rid = request.POST.get('result_id', '')
+            try:
+                r = ExamResult.objects.get(pk=rid, exam=exam, institution=inst)
+                r.delete()
+                messages.success(request, 'Result deleted.')
+            except ExamResult.DoesNotExist:
+                messages.error(request, 'Result not found.')
+        return redirect('core:faculty_exam_results', exam_id=exam.id)
+    return render(request, 'faculty/exam_results.html', {
+        'exam': exam, 'results': results, 'available_students': available_students,
+    })
+
+
+@login_required
+def student_exams(request):
+    if request.user.role != 'student':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    try:
+        student_obj = Student.objects.get(user=request.user, institution=inst)
+    except Student.DoesNotExist:
+        student_obj = None
+    if not student_obj:
+        return redirect('core:dashboard')
+    my_courses = StudentCourse.objects.filter(student=student_obj, institution=inst).values_list('course_id', flat=True)
+    exams = Exam.objects.filter(institution=inst, course_id__in=my_courses).select_related('course')
+    my_results = ExamResult.objects.filter(student=student_obj, institution=inst).select_related('exam', 'exam__course')
+    return render(request, 'student/exams.html', {
+        'exams': exams, 'my_results': my_results, 'student_obj': student_obj,
+    })
+
+
+# ─── LIBRARY VIEWS ─────────────────────────────────────────────
+
+@login_required
+def admin_books(request):
+    if request.user.role != 'admin':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    books = Book.objects.filter(institution=inst).order_by('title')
+    q = request.GET.get('q', '').strip()
+    if q:
+        books = books.filter(Q(title__icontains=q) | Q(author__icontains=q) | Q(category__icontains=q))
+    if request.method == 'POST' and request.POST.get('delete_id'):
+        bid = request.POST.get('delete_id')
+        try:
+            b = Book.objects.get(pk=bid, institution=inst)
+            log_audit(request.user, 'delete_book', f"Deleted book {b.title}", 'books')
+            b.delete()
+            messages.success(request, 'Book deleted.')
+        except Book.DoesNotExist:
+            messages.error(request, 'Book not found.')
+        return redirect('core:admin_books')
+    return render(request, 'admin_panel/books.html', {'books': books, 'q': q})
+
+
+@login_required
+def admin_add_book(request):
+    if request.user.role != 'admin':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        author = request.POST.get('author', '').strip()
+        isbn = request.POST.get('isbn', '').strip()
+        category = request.POST.get('category', '').strip()
+        total_copies = request.POST.get('total_copies', 1)
+        errors = []
+        if not title:
+            errors.append('Title is required.')
+        if not author:
+            errors.append('Author is required.')
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+            return render(request, 'admin_panel/add_book.html')
+        Book.objects.create(
+            institution=inst, title=title, author=author, isbn=isbn,
+            category=category, total_copies=int(total_copies), available_copies=int(total_copies),
+        )
+        log_audit(request.user, 'add_book', f"Added book {title}", 'books')
+        messages.success(request, f'Book "{title}" added.')
+        return redirect('core:admin_books')
+    return render(request, 'admin_panel/add_book.html')
+
+
+@login_required
+def admin_issue_book(request):
+    if request.user.role != 'admin':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    books = Book.objects.filter(institution=inst, available_copies__gt=0).order_by('title')
+    students = Student.objects.filter(institution=inst).order_by('name')
+    if request.method == 'POST':
+        book_id = request.POST.get('book', '')
+        student_id = request.POST.get('student', '')
+        due_date = request.POST.get('due_date', '')
+        errors = []
+        if not book_id:
+            errors.append('Please select a book.')
+        if not student_id:
+            errors.append('Please select a student.')
+        if not due_date:
+            errors.append('Due date is required.')
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+            return render(request, 'admin_panel/issue_book.html', {'books': books, 'students': students})
+        book = get_object_or_404(Book, pk=book_id, institution=inst)
+        student = get_object_or_404(Student, pk=student_id, institution=inst)
+        BookIssue.objects.create(
+            institution=inst, book=book, student=student,
+            issue_date=date.today(), due_date=due_date,
+        )
+        book.available_copies -= 1
+        book.save()
+        log_audit(request.user, 'issue_book', f"Issued {book.title} to {student.name}", 'book_issues')
+        messages.success(request, f'Book issued to {student.name}.')
+        return redirect('core:admin_book_issues')
+    return render(request, 'admin_panel/issue_book.html', {'books': books, 'students': students})
+
+
+@login_required
+def admin_book_issues(request):
+    if request.user.role != 'admin':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    issues = BookIssue.objects.filter(institution=inst).select_related('book', 'student').order_by('-issue_date')
+    status = request.GET.get('status', '')
+    if status:
+        issues = issues.filter(status=status)
+    if request.method == 'POST' and request.POST.get('return_id'):
+        rid = request.POST.get('return_id')
+        try:
+            issue = BookIssue.objects.get(pk=rid, institution=inst, status='Issued')
+            issue.status = 'Returned'
+            issue.return_date = date.today()
+            issue.save()
+            issue.book.available_copies += 1
+            issue.book.save()
+            log_audit(request.user, 'return_book', f"Returned {issue.book.title} from {issue.student.name}", 'book_issues')
+            messages.success(request, f'Book returned by {issue.student.name}.')
+        except BookIssue.DoesNotExist:
+            messages.error(request, 'Issue record not found.')
+        return redirect('core:admin_book_issues')
+    return render(request, 'admin_panel/book_issues.html', {'issues': issues, 'status_filter': status})
+
+
+@login_required
+def student_library(request):
+    if request.user.role != 'student':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    try:
+        student_obj = Student.objects.get(user=request.user, institution=inst)
+    except Student.DoesNotExist:
+        student_obj = None
+    if not student_obj:
+        return redirect('core:dashboard')
+    my_issues = BookIssue.objects.filter(student=student_obj, institution=inst).select_related('book').order_by('-issue_date')
+    books = Book.objects.filter(institution=inst).order_by('title')
+    return render(request, 'student/library.html', {
+        'my_issues': my_issues, 'books': books,
+    })
+
+
+# ─── EVENT VIEWS ───────────────────────────────────────────────
+
+@login_required
+def admin_events(request):
+    if request.user.role != 'admin':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    events = Event.objects.filter(institution=inst).order_by('-start_date')
+    if request.method == 'POST' and request.POST.get('delete_id'):
+        eid = request.POST.get('delete_id')
+        try:
+            ev = Event.objects.get(pk=eid, institution=inst)
+            log_audit(request.user, 'delete_event', f"Deleted event {ev.title}", 'events')
+            ev.delete()
+            messages.success(request, 'Event deleted.')
+        except Event.DoesNotExist:
+            messages.error(request, 'Event not found.')
+        return redirect('core:admin_events')
+    return render(request, 'admin_panel/events.html', {'events': events})
+
+
+@login_required
+def admin_add_event(request):
+    if request.user.role != 'admin':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        description = request.POST.get('description', '').strip()
+        event_type = request.POST.get('event_type', 'Academic')
+        start_date = request.POST.get('start_date', '')
+        end_date = request.POST.get('end_date', '')
+        venue = request.POST.get('venue', '').strip()
+        errors = []
+        if not title:
+            errors.append('Title is required.')
+        if not start_date:
+            errors.append('Start date is required.')
+        if not end_date:
+            errors.append('End date is required.')
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+            return render(request, 'admin_panel/add_event.html')
+        Event.objects.create(
+            institution=inst, title=title, description=description,
+            event_type=event_type, start_date=start_date, end_date=end_date,
+            venue=venue,
+        )
+        log_audit(request.user, 'add_event', f"Added event {title}", 'events')
+        messages.success(request, f'Event "{title}" created.')
+        return redirect('core:admin_events')
+    return render(request, 'admin_panel/add_event.html')
+
+
+@login_required
+def faculty_events(request):
+    if request.user.role != 'faculty':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    events = Event.objects.filter(institution=inst).order_by('-start_date')
+    return render(request, 'faculty/events.html', {'events': events})
+
+
+@login_required
+def student_events(request):
+    if request.user.role != 'student':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    events = Event.objects.filter(institution=inst).order_by('-start_date')
+    return render(request, 'student/events.html', {'events': events})

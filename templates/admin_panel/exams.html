@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Exams — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/admin_sidebar.html' with active='exams' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Exams</h1>
+                <div class="subtitle">Manage exams for all courses</div>
+            </div>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="file-text" style="width:22px;height:22px;"></i></div>
+                <div class="stat-info">
+                    <div class="stat-val">{{ exams.count }}</div>
+                    <div class="stat-label">Total Exams</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <a href="{% url 'core:admin_add_exam' %}" class="quick-action-btn" style="background:var(--brand);color:white;"><i data-lucide="plus" style="width:18px;height:18px;"></i> Add Exam</a>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="file-text" style="width:18px;height:18px;"></i> All Exams</div>
+                <form class="search-form" method="GET" style="margin:0;">
+                    <input type="text" name="q" value="{{ q }}" placeholder="Search exams..." style="padding:8px 12px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--r-sm);color:var(--text-primary);font-size:13px;width:200px;">
+                    <button type="submit" class="btn btn-sm btn-primary">Search</button>
+                </form>
+            </div>
+            {% if exams %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr>
+                        <th>Title</th><th>Course</th><th>Type</th><th>Date</th><th>Marks</th><th>Actions</th>
+                    </tr></thead>
+                    <tbody>
+                    {% for exam in exams %}
+                    <tr>
+                        <td><strong>{{ exam.title }}</strong>{% if exam.subject %}<br><small style="color:var(--text-tertiary);">{{ exam.subject }}</small>{% endif %}</td>
+                        <td>{{ exam.course.name }}</td>
+                        <td><span class="badge badge-blue">{{ exam.exam_type }}</span></td>
+                        <td>{{ exam.exam_date }}</td>
+                        <td>{{ exam.passing_marks }}/{{ exam.total_marks }}</td>
+                        <td>
+                            <a href="{% url 'core:admin_exam_results' exam_id=exam.id %}" class="btn btn-sm btn-primary">Results</a>
+                            <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this exam?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="delete_id" value="{{ exam.id }}">
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon"><i data-lucide="file-text" style="width:40px;height:40px;"></i></div>
+                <h3>No Exams Yet</h3>
+                <p>Create your first exam to start tracking results.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

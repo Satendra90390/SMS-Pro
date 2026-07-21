@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Add Exam — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/admin_sidebar.html' with active='exams' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Add Exam</h1>
+                <div class="subtitle">Create a new exam</div>
+            </div>
+        </div>
+
+        <div class="card" style="max-width:600px;">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="plus-circle" style="width:18px;height:18px;"></i> Exam Details</div>
+            </div>
+            <form method="POST" class="auth-form">{% csrf_token %}
+                <div class="form-group">
+                    <label>Title <span style="color:var(--danger);">*</span></label>
+                    <input type="text" name="title" placeholder="e.g. Midterm Examination" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Course <span style="color:var(--danger);">*</span></label>
+                        <select name="course" required style="width:100%;padding:10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--r-sm);color:var(--text-primary);font-size:14px;">
+                            <option value="">Select course</option>
+                            {% for c in courses %}
+                            <option value="{{ c.id }}">{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select name="exam_type" style="width:100%;padding:10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--r-sm);color:var(--text-primary);font-size:14px;">
+                            <option value="Quiz">Quiz</option>
+                            <option value="Assignment">Assignment</option>
+                            <option value="Midterm" selected>Midterm</option>
+                            <option value="Final">Final</option>
+                            <option value="Practical">Practical</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" name="subject" placeholder="e.g. Mathematics">
+                </div>
+                <div class="form-group">
+                    <label>Exam Date <span style="color:var(--danger);">*</span></label>
+                    <input type="date" name="exam_date" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Total Marks</label>
+                        <input type="number" name="total_marks" value="100" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Passing Marks</label>
+                        <input type="number" name="passing_marks" value="40" min="1">
+                    </div>
+                </div>
+                <div class="form-actions" style="margin-top:16px;">
+                    <a href="{% url 'core:admin_exams' %}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Create Exam</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+{% endblock %}

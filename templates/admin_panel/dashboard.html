@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Admin Dashboard - SMS{% endblock %}
+{% block title %}Admin Dashboard — Edosaic{% endblock %}
 {% block body %}
 <div class="layout">
     {% include 'components/admin_sidebar.html' with active='dashboard' %}
@@ -17,31 +17,31 @@
         <div class="stat-grid">
             <div class="stat-card">
                 <div class="stat-icon"><i data-lucide="graduation-cap" style="width:22px;height:22px;"></i></div>
-                <div>
-                    <div class="stat-value">{{ student_count }}</div>
-                    <div class="stat-label">Total Students</div>
-                </div>
+                <div><div class="stat-value">{{ student_count }}</div><div class="stat-label">Students</div></div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon"><i data-lucide="users" style="width:22px;height:22px;"></i></div>
-                <div>
-                    <div class="stat-value">{{ faculty_count }}</div>
-                    <div class="stat-label">Total Faculty</div>
-                </div>
+                <div><div class="stat-value">{{ faculty_count }}</div><div class="stat-label">Faculty</div></div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon"><i data-lucide="calendar-check" style="width:22px;height:22px;"></i></div>
-                <div>
-                    <div class="stat-value">{{ total_attendance }}</div>
-                    <div class="stat-label">Attendance Records</div>
-                </div>
+                <div><div class="stat-value">{{ total_attendance }}</div><div class="stat-label">Attendance</div></div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon"><i data-lucide="indian-rupee" style="width:22px;height:22px;"></i></div>
-                <div>
-                    <div class="stat-value">&#8377;{{ fees_collected|floatformat:0 }}</div>
-                    <div class="stat-label">Fees Collected</div>
-                </div>
+                <div><div class="stat-value">&#8377;{{ fees_collected|floatformat:0 }}</div><div class="stat-label">Fees Collected</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6;"><i data-lucide="clipboard-check" style="width:22px;height:22px;"></i></div>
+                <div><div class="stat-value">{{ exam_count }}</div><div class="stat-label">Exams</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:rgba(16,185,129,0.15);color:#22c55e;"><i data-lucide="library" style="width:22px;height:22px;"></i></div>
+                <div><div class="stat-value">{{ book_count }}</div><div class="stat-label">Books</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;"><i data-lucide="calendar" style="width:22px;height:22px;"></i></div>
+                <div><div class="stat-value">{{ event_count }}</div><div class="stat-label">Events</div></div>
             </div>
         </div>
 
@@ -91,13 +91,21 @@
                     <div class="qa-icon"><i data-lucide="users" style="width:20px;height:20px;"></i></div>
                     Faculty
                 </a>
-                <a href="{% url 'core:admin_subjects' %}" class="quick-action-btn">
-                    <div class="qa-icon"><i data-lucide="book-open" style="width:20px;height:20px;"></i></div>
-                    Subjects
+                <a href="{% url 'core:admin_exams' %}" class="quick-action-btn">
+                    <div class="qa-icon"><i data-lucide="clipboard-check" style="width:20px;height:20px;"></i></div>
+                    Exams
                 </a>
-                <a href="{% url 'core:admin_reports' %}" class="quick-action-btn">
-                    <div class="qa-icon"><i data-lucide="bar-chart-3" style="width:20px;height:20px;"></i></div>
-                    Reports
+                <a href="{% url 'core:admin_books' %}" class="quick-action-btn">
+                    <div class="qa-icon"><i data-lucide="library" style="width:20px;height:20px;"></i></div>
+                    Library
+                </a>
+                <a href="{% url 'core:admin_events' %}" class="quick-action-btn">
+                    <div class="qa-icon"><i data-lucide="calendar" style="width:20px;height:20px;"></i></div>
+                    Events
+                </a>
+                <a href="{% url 'core:admin_fees' %}" class="quick-action-btn">
+                    <div class="qa-icon"><i data-lucide="indian-rupee" style="width:20px;height:20px;"></i></div>
+                    Fees
                 </a>
             </div>
         </div>

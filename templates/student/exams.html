@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}My Exams — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/student_sidebar.html' with active='exams' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>My Exams</h1>
+                <div class="subtitle">Exam schedule and results</div>
+            </div>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="file-text" style="width:22px;height:22px;"></i></div>
+                <div class="stat-info"><div class="stat-val">{{ exams.count }}</div><div class="stat-label">Upcoming Exams</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:rgba(16,185,129,0.15);color:#22c55e;"><i data-lucide="check-circle" style="width:22px;height:22px;"></i></div>
+                <div class="stat-info"><div class="stat-val">{{ my_results.count }}</div><div class="stat-label">Results</div></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="file-text" style="width:18px;height:18px;"></i> Exam Schedule</div>
+            </div>
+            {% if exams %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Title</th><th>Course</th><th>Type</th><th>Date</th><th>Marks</th></tr></thead>
+                    <tbody>
+                    {% for exam in exams %}
+                    <tr>
+                        <td><strong>{{ exam.title }}</strong>{% if exam.subject %}<br><small style="color:var(--text-tertiary);">{{ exam.subject }}</small>{% endif %}</td>
+                        <td>{{ exam.course.name }}</td>
+                        <td><span class="badge badge-blue">{{ exam.exam_type }}</span></td>
+                        <td>{{ exam.exam_date }}</td>
+                        <td>{{ exam.passing_marks }}/{{ exam.total_marks }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon"><i data-lucide="file-text" style="width:40px;height:40px;"></i></div>
+                <h3>No Upcoming Exams</h3>
+                <p>Your exams will appear here once scheduled.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if my_results %}
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="award" style="width:18px;height:18px;"></i> My Results</div>
+            </div>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Exam</th><th>Course</th><th>Marks</th><th>Status</th><th>Remarks</th></tr></thead>
+                    <tbody>
+                    {% for r in my_results %}
+                    <tr>
+                        <td><strong>{{ r.exam.title }}</strong></td>
+                        <td>{{ r.exam.course.name }}</td>
+                        <td>{{ r.marks }} / {{ r.exam.total_marks }}</td>
+                        <td>
+                            {% if r.is_pass %}
+                            <span class="badge badge-green">Pass</span>
+                            {% else %}
+                            <span class="badge badge-red">Fail</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ r.remarks|default:"—" }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

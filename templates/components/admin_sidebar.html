@@ -20,7 +20,10 @@
         <a href="{% url 'core:admin_add_faculty' %}" {% if active == 'add_faculty' %}class="active"{% endif %}><span class="icon"><i data-lucide="user-plus" style="width:18px;height:18px;"></i></span> Add Faculty</a>
         <a href="{% url 'core:admin_subjects' %}" {% if active == 'subjects' %}class="active"{% endif %}><span class="icon"><i data-lucide="book-open" style="width:18px;height:18px;"></i></span> Manage Subjects</a>
         <a href="{% url 'core:admin_reports' %}" {% if active == 'reports' %}class="active"{% endif %}><span class="icon"><i data-lucide="file-text" style="width:18px;height:18px;"></i></span> Reports</a>
+        <a href="{% url 'core:admin_exams' %}" {% if active == 'exams' %}class="active"{% endif %}><span class="icon"><i data-lucide="clipboard-check" style="width:18px;height:18px;"></i></span> Exams</a>
         <a href="{% url 'core:admin_fees' %}" {% if active == 'fees' %}class="active"{% endif %}><span class="icon"><i data-lucide="indian-rupee" style="width:18px;height:18px;"></i></span> Fees Management</a>
+        <a href="{% url 'core:admin_books' %}" {% if active == 'books' %}class="active"{% endif %}><span class="icon"><i data-lucide="library" style="width:18px;height:18px;"></i></span> Library</a>
+        <a href="{% url 'core:admin_events' %}" {% if active == 'events' %}class="active"{% endif %}><span class="icon"><i data-lucide="calendar" style="width:18px;height:18px;"></i></span> Events</a>
         <a href="{% url 'core:admin_analytics' %}" {% if active == 'analytics' %}class="active"{% endif %}><span class="icon"><i data-lucide="bar-chart-3" style="width:18px;height:18px;"></i></span> System Analytics</a>
     </div>
     <div class="sidebar-footer">

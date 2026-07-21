@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Books — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/admin_sidebar.html' with active='books' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Library Books</h1>
+                <div class="subtitle">Manage your institution's book inventory</div>
+            </div>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="book-open" style="width:22px;height:22px;"></i></div>
+                <div class="stat-info"><div class="stat-val">{{ books.count }}</div><div class="stat-label">Total Books</div></div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <a href="{% url 'core:admin_add_book' %}" class="quick-action-btn" style="background:var(--brand);color:white;"><i data-lucide="plus" style="width:18px;height:18px;"></i> Add Book</a>
+            <a href="{% url 'core:admin_issue_book' %}" class="quick-action-btn"><i data-lucide="arrow-up-from-line" style="width:18px;height:18px;"></i> Issue Book</a>
+            <a href="{% url 'core:admin_book_issues' %}" class="quick-action-btn"><i data-lucide="list" style="width:18px;height:18px;"></i> Issue Records</a>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="book-open" style="width:18px;height:18px;"></i> Book Inventory</div>
+                <form class="search-form" method="GET" style="margin:0;">
+                    <input type="text" name="q" value="{{ q }}" placeholder="Search books..." style="padding:8px 12px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--r-sm);color:var(--text-primary);font-size:13px;width:200px;">
+                    <button type="submit" class="btn btn-sm btn-primary">Search</button>
+                </form>
+            </div>
+            {% if books %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Title</th><th>Author</th><th>Category</th><th>ISBN</th><th>Available</th><th>Total</th><th>Action</th></tr></thead>
+                    <tbody>
+                    {% for b in books %}
+                    <tr>
+                        <td><strong>{{ b.title }}</strong></td>
+                        <td>{{ b.author }}</td>
+                        <td>{{ b.category|default:"—" }}</td>
+                        <td>{{ b.isbn|default:"—" }}</td>
+                        <td>
+                            {% if b.available_copies > 0 %}
+                            <span class="badge badge-green">{{ b.available_copies }}</span>
+                            {% else %}
+                            <span class="badge badge-red">0</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ b.total_copies }}</td>
+                        <td>
+                            <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this book?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="delete_id" value="{{ b.id }}">
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon"><i data-lucide="book-open" style="width:40px;height:40px;"></i></div>
+                <h3>No Books Yet</h3>
+                <p>Add books to start managing your library.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

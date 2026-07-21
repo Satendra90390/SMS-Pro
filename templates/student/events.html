@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Events — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/student_sidebar.html' with active='events' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Events</h1>
+                <div class="subtitle">Upcoming and past events</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="calendar" style="width:18px;height:18px;"></i> All Events</div>
+            </div>
+            {% if events %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Title</th><th>Type</th><th>Start</th><th>End</th><th>Venue</th></tr></thead>
+                    <tbody>
+                    {% for e in events %}
+                    <tr>
+                        <td><strong>{{ e.title }}</strong>{% if e.description %}<br><small style="color:var(--text-tertiary);">{{ e.description|truncatechars:60 }}</small>{% endif %}</td>
+                        <td><span class="badge badge-blue">{{ e.event_type }}</span></td>
+                        <td>{{ e.start_date }}</td>
+                        <td>{{ e.end_date }}</td>
+                        <td>{{ e.venue|default:"—" }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon"><i data-lucide="calendar" style="width:40px;height:40px;"></i></div>
+                <h3>No Events</h3>
+                <p>No events have been announced yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

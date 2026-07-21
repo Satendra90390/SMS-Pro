@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Library — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/student_sidebar.html' with active='library' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Library</h1>
+                <div class="subtitle">Browse books and check your issued books</div>
+            </div>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="book-open" style="width:22px;height:22px;"></i></div>
+                <div class="stat-info"><div class="stat-val">{{ books.count }}</div><div class="stat-label">Total Books</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;"><i data-lucide="bookmark" style="width:22px;height:22px;"></i></div>
+                <div class="stat-info"><div class="stat-val">{{ my_issues.count }}</div><div class="stat-label">My Issues</div></div>
+            </div>
+        </div>
+
+        {% if my_issues %}
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="bookmark" style="width:18px;height:18px;"></i> My Issued Books</div>
+            </div>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Book</th><th>Issue Date</th><th>Due Date</th><th>Return Date</th><th>Status</th></tr></thead>
+                    <tbody>
+                    {% for i in my_issues %}
+                    <tr>
+                        <td><strong>{{ i.book.title }}</strong><br><small style="color:var(--text-tertiary);">{{ i.book.author }}</small></td>
+                        <td>{{ i.issue_date }}</td>
+                        <td>{{ i.due_date }}</td>
+                        <td>{{ i.return_date|default:"—" }}</td>
+                        <td>
+                            {% if i.status == 'Issued' %}<span class="badge badge-yellow">{{ i.status }}</span>
+                            {% elif i.status == 'Returned' %}<span class="badge badge-green">{{ i.status }}</span>
+                            {% else %}<span class="badge badge-red">{{ i.status }}</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="book-open" style="width:18px;height:18px;"></i> Available Books</div>
+            </div>
+            {% if books %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Title</th><th>Author</th><th>Category</th><th>Available</th></tr></thead>
+                    <tbody>
+                    {% for b in books %}
+                    <tr>
+                        <td><strong>{{ b.title }}</strong></td>
+                        <td>{{ b.author }}</td>
+                        <td>{{ b.category|default:"—" }}</td>
+                        <td><span class="badge {% if b.available_copies > 0 %}badge-green{% else %}badge-red{% endif %}">{{ b.available_copies }}/{{ b.total_copies }}</span></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon"><i data-lucide="book-open" style="width:40px;height:40px;"></i></div>
+                <h3>No Books in Library</h3>
+                <p>Library inventory will appear here.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

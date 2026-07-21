@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Book Issues — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/admin_sidebar.html' with active='books' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Book Issues</h1>
+                <div class="subtitle">Track issued books</div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <a href="{% url 'core:admin_issue_book' %}" class="quick-action-btn" style="background:var(--brand);color:white;"><i data-lucide="plus" style="width:18px;height:18px;"></i> Issue Book</a>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="list" style="width:18px;height:18px;"></i> Issue Records</div>
+                <div class="filter-tabs">
+                    <a href="{% url 'core:admin_book_issues' %}" class="filter-tab {% if not status_filter %}active{% endif %}">All</a>
+                    <a href="{% url 'core:admin_book_issues' %}?status=Issued" class="filter-tab {% if status_filter == 'Issued' %}active{% endif %}">Issued</a>
+                    <a href="{% url 'core:admin_book_issues' %}?status=Returned" class="filter-tab {% if status_filter == 'Returned' %}active{% endif %}">Returned</a>
+                    <a href="{% url 'core:admin_book_issues' %}?status=Overdue" class="filter-tab {% if status_filter == 'Overdue' %}active{% endif %}">Overdue</a>
+                </div>
+            </div>
+            {% if issues %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Book</th><th>Student</th><th>Issue Date</th><th>Due Date</th><th>Return Date</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody>
+                    {% for i in issues %}
+                    <tr>
+                        <td><strong>{{ i.book.title }}</strong></td>
+                        <td>{{ i.student.name }}</td>
+                        <td>{{ i.issue_date }}</td>
+                        <td>{{ i.due_date }}</td>
+                        <td>{{ i.return_date|default:"—" }}</td>
+                        <td>
+                            {% if i.status == 'Issued' %}<span class="badge badge-yellow">{{ i.status }}</span>
+                            {% elif i.status == 'Returned' %}<span class="badge badge-green">{{ i.status }}</span>
+                            {% else %}<span class="badge badge-red">{{ i.status }}</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if i.status == 'Issued' %}
+                            <form method="POST" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="return_id" value="{{ i.id }}">
+                                <button class="btn btn-sm btn-primary">Return</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon"><i data-lucide="list" style="width:40px;height:40px;"></i></div>
+                <h3>No Issue Records</h3>
+                <p>Issue a book to a student to see records here.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

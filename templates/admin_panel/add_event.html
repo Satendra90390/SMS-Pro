@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Add Event — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/admin_sidebar.html' with active='events' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Add Event</h1>
+                <div class="subtitle">Create a new institutional event</div>
+            </div>
+        </div>
+
+        <div class="card" style="max-width:600px;">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="plus-circle" style="width:18px;height:18px;"></i> Event Details</div>
+            </div>
+            <form method="POST" class="auth-form">{% csrf_token %}
+                <div class="form-group">
+                    <label>Title <span style="color:var(--danger);">*</span></label>
+                    <input type="text" name="title" placeholder="e.g. Annual Day Celebration" required>
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select name="event_type" style="width:100%;padding:10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--r-sm);color:var(--text-primary);font-size:14px;">
+                        <option value="Academic">Academic</option>
+                        <option value="Cultural">Cultural</option>
+                        <option value="Sports">Sports</option>
+                        <option value="Workshop">Workshop</option>
+                        <option value="Meeting">Meeting</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3" placeholder="Event description..." style="width:100%;padding:10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--r-sm);color:var(--text-primary);font-size:14px;font-family:inherit;"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Start Date <span style="color:var(--danger);">*</span></label>
+                        <input type="date" name="start_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>End Date <span style="color:var(--danger);">*</span></label>
+                        <input type="date" name="end_date" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Venue</label>
+                    <input type="text" name="venue" placeholder="e.g. Main Auditorium">
+                </div>
+                <div class="form-actions" style="margin-top:16px;">
+                    <a href="{% url 'core:admin_events' %}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Create Event</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+{% endblock %}
