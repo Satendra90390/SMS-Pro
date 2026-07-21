@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
-{% block title %}Library — Edosaic{% endblock %}
+{% block title %}Librarian Dashboard — Edosaic{% endblock %}
 {% block body %}
 <div class="layout">
-    {% include 'components/admin_sidebar.html' with active='books' %}
+    {% include 'components/librarian_sidebar.html' with active='dashboard' %}
     <main class="main-content">
         <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
         <div class="page-header">
             <div class="header-avatar">{{ user.username.0|upper }}</div>
             <div>
-                <h1>Library Overview</h1>
-                <div class="subtitle">Read-only view — librarian manages all library operations</div>
+                <h1>Library Dashboard</h1>
+                <div class="subtitle">Overview of library operations</div>
             </div>
         </div>
 
@@ -27,13 +27,21 @@
                 <div class="stat-info"><div class="stat-val">{{ active_issues }}</div><div class="stat-label">Issued Out</div></div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon" style="background:rgba(16,185,129,0.15);color:#22c55e;"><i data-lucide="rotate-ccw" style="width:22px;height:22px;"></i></div>
-                <div class="stat-info"><div class="stat-val">{{ returned }}</div><div class="stat-label">Returned</div></div>
+                <div class="stat-icon" style="background:rgba(239,68,68,0.15);color:#ef4444;"><i data-lucide="alert-triangle" style="width:22px;height:22px;"></i></div>
+                <div class="stat-info"><div class="stat-val">{{ overdue_issues }}</div><div class="stat-label">Overdue</div></div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon" style="background:rgba(239,68,68,0.15);color:#ef4444;"><i data-lucide="indian-rupee" style="width:22px;height:22px;"></i></div>
                 <div class="stat-info"><div class="stat-val">&#8377;{{ total_fines|floatformat:0 }}</div><div class="stat-label">Pending Fines</div></div>
             </div>
+        </div>
+
+        <div class="quick-actions">
+            <a href="{% url 'core:librarian_add_book' %}" class="quick-action-btn" style="background:var(--brand);color:white;"><i data-lucide="plus" style="width:18px;height:18px;"></i> Add Book</a>
+            <a href="{% url 'core:librarian_issue' %}" class="quick-action-btn"><i data-lucide="arrow-up-from-line" style="width:18px;height:18px;"></i> Issue Book</a>
+            <a href="{% url 'core:librarian_books' %}" class="quick-action-btn"><i data-lucide="book-open" style="width:18px;height:18px;"></i> All Books</a>
+            <a href="{% url 'core:librarian_issues' %}" class="quick-action-btn"><i data-lucide="list" style="width:18px;height:18px;"></i> Issue Records</a>
+            <a href="{% url 'core:librarian_fines' %}" class="quick-action-btn"><i data-lucide="indian-rupee" style="width:18px;height:18px;"></i> Manage Fines</a>
         </div>
 
         <div class="card">
@@ -43,13 +51,12 @@
             {% if recent_issues %}
             <div class="table-wrap">
                 <table class="data-table">
-                    <thead><tr><th>Book</th><th>Student</th><th>Issued By</th><th>Issue Date</th><th>Due Date</th><th>Status</th></tr></thead>
+                    <thead><tr><th>Book</th><th>Student</th><th>Issue Date</th><th>Due Date</th><th>Status</th></tr></thead>
                     <tbody>
                     {% for i in recent_issues %}
                     <tr>
                         <td><strong>{{ i.book.title }}</strong></td>
                         <td>{{ i.student.name }}</td>
-                        <td>{{ i.issued_by.username|default:"—" }}</td>
                         <td>{{ i.issue_date }}</td>
                         <td>{{ i.due_date }}</td>
                         <td>
@@ -63,11 +70,7 @@
                 </table>
             </div>
             {% else %}
-            <div class="empty-state">
-                <div class="empty-icon"><i data-lucide="list" style="width:40px;height:40px;"></i></div>
-                <h3>No Issues Yet</h3>
-                <p>The librarian will manage book issues. This view shows activity summary.</p>
-            </div>
+            <div class="empty-state"><div class="empty-icon"><i data-lucide="list" style="width:40px;height:40px;"></i></div><h3>No Recent Issues</h3></div>
             {% endif %}
         </div>
     </main>

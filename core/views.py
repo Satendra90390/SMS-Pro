@@ -6,7 +6,7 @@ from datetime import date, timedelta
 from .models import (
     Institution, Student, Faculty, Course, Branch, Subject, FacultyTeaching,
     StudentCourse, Result, Attendance, Fee, Parent, AuditLog,
-    Exam, ExamResult, Book, BookIssue, Event,
+    Exam, ExamResult, Book, BookIssue, BookFine, Event,
 )
 from accounts.models import User
 
@@ -25,6 +25,8 @@ def dashboard_router(request):
         return redirect('core:admin_dashboard')
     elif role == 'accountant':
         return redirect('core:accountant_dashboard')
+    elif role == 'librarian':
+        return redirect('core:librarian_dashboard')
     elif role == 'faculty':
         return redirect('core:faculty_dashboard')
     elif role == 'student':
@@ -706,10 +708,69 @@ def admin_books(request):
     if request.user.role != 'admin':
         return redirect('core:dashboard')
     inst = request.user.institution
+    total_books = Book.objects.filter(institution=inst).aggregate(total=Sum('total_copies'), available=Sum('available_copies'))
+    total_issues = BookIssue.objects.filter(institution=inst).count()
+    active_issues = BookIssue.objects.filter(institution=inst, status='Issued').count()
+    returned = BookIssue.objects.filter(institution=inst, status='Returned').count()
+    total_fines = BookFine.objects.filter(institution=inst, status='Pending').aggregate(total=Sum('amount'))['total'] or 0
+    recent_issues = BookIssue.objects.filter(institution=inst).select_related('book', 'student').order_by('-issue_date')[:15]
+    return render(request, 'admin_panel/books.html', {
+        'total_books': total_books,
+        'total_issues': total_issues,
+        'active_issues': active_issues,
+        'returned': returned,
+        'total_fines': total_fines,
+        'recent_issues': recent_issues,
+    })
+
+
+@login_required
+def admin_add_book(request):
+    return redirect('core:admin_books')
+
+
+@login_required
+def admin_issue_book(request):
+    return redirect('core:admin_books')
+
+
+@login_required
+def admin_book_issues(request):
+    return redirect('core:admin_books')
+
+
+# ─── LIBRARIAN VIEWS ──────────────────────────────────────────
+
+@login_required
+def librarian_dashboard(request):
+    if request.user.role != 'librarian':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    total_books = Book.objects.filter(institution=inst).aggregate(total=Sum('total_copies'), available=Sum('available_copies'))
+    total_issues = BookIssue.objects.filter(institution=inst).count()
+    active_issues = BookIssue.objects.filter(institution=inst, status='Issued').count()
+    overdue_issues = BookIssue.objects.filter(institution=inst, status='Overdue').count()
+    total_fines = BookFine.objects.filter(institution=inst, status='Pending').aggregate(total=Sum('amount'))['total'] or 0
+    recent_issues = BookIssue.objects.filter(institution=inst).select_related('book', 'student').order_by('-issue_date')[:10]
+    return render(request, 'librarian/dashboard.html', {
+        'total_books': total_books,
+        'total_issues': total_issues,
+        'active_issues': active_issues,
+        'overdue_issues': overdue_issues,
+        'total_fines': total_fines,
+        'recent_issues': recent_issues,
+    })
+
+
+@login_required
+def librarian_books(request):
+    if request.user.role != 'librarian':
+        return redirect('core:dashboard')
+    inst = request.user.institution
     books = Book.objects.filter(institution=inst).order_by('title')
     q = request.GET.get('q', '').strip()
     if q:
-        books = books.filter(Q(title__icontains=q) | Q(author__icontains=q) | Q(category__icontains=q))
+        books = books.filter(Q(title__icontains=q) | Q(author__icontains=q) | Q(category__icontains=q) | Q(isbn__icontains=q))
     if request.method == 'POST' and request.POST.get('delete_id'):
         bid = request.POST.get('delete_id')
         try:
@@ -719,13 +780,13 @@ def admin_books(request):
             messages.success(request, 'Book deleted.')
         except Book.DoesNotExist:
             messages.error(request, 'Book not found.')
-        return redirect('core:admin_books')
-    return render(request, 'admin_panel/books.html', {'books': books, 'q': q})
+        return redirect('core:librarian_books')
+    return render(request, 'librarian/books.html', {'books': books, 'q': q})
 
 
 @login_required
-def admin_add_book(request):
-    if request.user.role != 'admin':
+def librarian_add_book(request):
+    if request.user.role != 'librarian':
         return redirect('core:dashboard')
     inst = request.user.institution
     if request.method == 'POST':
@@ -734,85 +795,151 @@ def admin_add_book(request):
         isbn = request.POST.get('isbn', '').strip()
         category = request.POST.get('category', '').strip()
         total_copies = request.POST.get('total_copies', 1)
-        errors = []
         if not title:
-            errors.append('Title is required.')
+            messages.error(request, 'Title is required.')
+            return render(request, 'librarian/add_book.html')
         if not author:
-            errors.append('Author is required.')
-        if errors:
-            for e in errors:
-                messages.error(request, e)
-            return render(request, 'admin_panel/add_book.html')
+            messages.error(request, 'Author is required.')
+            return render(request, 'librarian/add_book.html')
         Book.objects.create(
             institution=inst, title=title, author=author, isbn=isbn,
             category=category, total_copies=int(total_copies), available_copies=int(total_copies),
         )
         log_audit(request.user, 'add_book', f"Added book {title}", 'books')
         messages.success(request, f'Book "{title}" added.')
-        return redirect('core:admin_books')
-    return render(request, 'admin_panel/add_book.html')
+        return redirect('core:librarian_books')
+    return render(request, 'librarian/add_book.html')
 
 
 @login_required
-def admin_issue_book(request):
-    if request.user.role != 'admin':
+def librarian_edit_book(request, book_id):
+    if request.user.role != 'librarian':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    book = get_object_or_404(Book, pk=book_id, institution=inst)
+    if request.method == 'POST':
+        book.title = request.POST.get('title', book.title).strip()
+        book.author = request.POST.get('author', book.author).strip()
+        book.isbn = request.POST.get('isbn', book.isbn).strip()
+        book.category = request.POST.get('category', book.category).strip()
+        old_total = book.total_copies
+        new_total = int(request.POST.get('total_copies', book.total_copies))
+        diff = new_total - old_total
+        book.total_copies = new_total
+        book.available_copies = max(0, book.available_copies + diff)
+        book.save()
+        log_audit(request.user, 'edit_book', f"Edited book {book.title}", 'books')
+        messages.success(request, f'Book "{book.title}" updated.')
+        return redirect('core:librarian_books')
+    return render(request, 'librarian/edit_book.html', {'book': book})
+
+
+@login_required
+def librarian_issue(request):
+    if request.user.role != 'librarian':
         return redirect('core:dashboard')
     inst = request.user.institution
     books = Book.objects.filter(institution=inst, available_copies__gt=0).order_by('title')
-    students = Student.objects.filter(institution=inst).order_by('name')
+    people = Student.objects.filter(institution=inst).order_by('name')
     if request.method == 'POST':
         book_id = request.POST.get('book', '')
-        student_id = request.POST.get('student', '')
+        person_id = request.POST.get('person', '')
         due_date = request.POST.get('due_date', '')
         errors = []
         if not book_id:
             errors.append('Please select a book.')
-        if not student_id:
-            errors.append('Please select a student.')
+        if not person_id:
+            errors.append('Please select a student/teacher.')
         if not due_date:
             errors.append('Due date is required.')
         if errors:
             for e in errors:
                 messages.error(request, e)
-            return render(request, 'admin_panel/issue_book.html', {'books': books, 'students': students})
+            return render(request, 'librarian/issue.html', {'books': books, 'people': people})
         book = get_object_or_404(Book, pk=book_id, institution=inst)
-        student = get_object_or_404(Student, pk=student_id, institution=inst)
+        person = get_object_or_404(Student, pk=person_id, institution=inst)
         BookIssue.objects.create(
-            institution=inst, book=book, student=student,
+            institution=inst, book=book, student=person,
+            issued_by=request.user,
             issue_date=date.today(), due_date=due_date,
         )
         book.available_copies -= 1
         book.save()
-        log_audit(request.user, 'issue_book', f"Issued {book.title} to {student.name}", 'book_issues')
-        messages.success(request, f'Book issued to {student.name}.')
-        return redirect('core:admin_book_issues')
-    return render(request, 'admin_panel/issue_book.html', {'books': books, 'students': students})
+        log_audit(request.user, 'issue_book', f"Issued {book.title} to {person.name}", 'book_issues')
+        messages.success(request, f'Book issued to {person.name}.')
+        return redirect('core:librarian_issues')
+    return render(request, 'librarian/issue.html', {'books': books, 'people': people})
 
 
 @login_required
-def admin_book_issues(request):
-    if request.user.role != 'admin':
+def librarian_issues(request):
+    if request.user.role != 'librarian':
         return redirect('core:dashboard')
     inst = request.user.institution
-    issues = BookIssue.objects.filter(institution=inst).select_related('book', 'student').order_by('-issue_date')
+    issues = BookIssue.objects.filter(institution=inst).select_related('book', 'student', 'issued_by').order_by('-issue_date')
     status = request.GET.get('status', '')
+    q = request.GET.get('q', '').strip()
     if status:
         issues = issues.filter(status=status)
-    if request.method == 'POST' and request.POST.get('return_id'):
-        rid = request.POST.get('return_id')
-        try:
-            issue = BookIssue.objects.get(pk=rid, institution=inst, status='Issued')
-            issue.status = 'Returned'
-            issue.return_date = date.today()
-            issue.save()
-            issue.book.available_copies += 1
-            issue.book.save()
-            log_audit(request.user, 'return_book', f"Returned {issue.book.title} from {issue.student.name}", 'book_issues')
-            messages.success(request, f'Book returned by {issue.student.name}.')
-        except BookIssue.DoesNotExist:
-            messages.error(request, 'Issue record not found.')
-        return redirect('core:admin_book_issues')
-    return render(request, 'admin_panel/book_issues.html', {'issues': issues, 'status_filter': status})
+    if q:
+        issues = issues.filter(Q(student__name__icontains=q) | Q(book__title__icontains=q))
+    if request.method == 'POST':
+        action = request.POST.get('action', '')
+        if action == 'return':
+            rid = request.POST.get('return_id', '')
+            try:
+                issue = BookIssue.objects.get(pk=rid, institution=inst, status__in=['Issued', 'Overdue'])
+                issue.status = 'Returned'
+                issue.return_date = date.today()
+                issue.save()
+                issue.book.available_copies += 1
+                issue.book.save()
+                log_audit(request.user, 'return_book', f"Returned {issue.book.title} from {issue.student.name}", 'book_issues')
+                messages.success(request, f'Book returned by {issue.student.name}.')
+            except BookIssue.DoesNotExist:
+                messages.error(request, 'Issue record not found.')
+        return redirect('core:librarian_issues')
+    return render(request, 'librarian/issues.html', {'issues': issues, 'status_filter': status, 'q': q})
+
+
+@login_required
+def librarian_fines(request):
+    if request.user.role != 'librarian':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    fines = BookFine.objects.filter(institution=inst).select_related('student', 'issue', 'issue__book').order_by('-created_at')
+    total_pending = fines.filter(status='Pending').aggregate(total=Sum('amount'))['total'] or 0
+    total_paid = fines.filter(status='Paid').aggregate(total=Sum('amount'))['total'] or 0
+    if request.method == 'POST':
+        action = request.POST.get('action', '')
+        if action == 'add':
+            issue_id = request.POST.get('issue_id', '')
+            amount = request.POST.get('amount', 0)
+            reason = request.POST.get('reason', '').strip()
+            if issue_id and float(amount) > 0:
+                issue = get_object_or_404(BookIssue, pk=issue_id, institution=inst)
+                BookFine.objects.create(
+                    institution=inst, issue=issue, student=issue.student,
+                    amount=float(amount), reason=reason,
+                )
+                issue.fine_amount += float(amount)
+                issue.save()
+                log_audit(request.user, 'add_fine', f"Added fine ₹{amount} for {issue.student.name}", 'book_fines')
+                messages.success(request, f'Fine of ₹{amount} added for {issue.student.name}.')
+        elif action == 'pay':
+            fid = request.POST.get('fine_id', '')
+            try:
+                fine = BookFine.objects.get(pk=fid, institution=inst, status='Pending')
+                fine.status = 'Paid'
+                fine.save()
+                log_audit(request.user, 'pay_fine', f"Fine paid by {fine.student.name} - ₹{fine.amount}", 'book_fines')
+                messages.success(request, f'Fine marked as paid for {fine.student.name}.')
+            except BookFine.DoesNotExist:
+                messages.error(request, 'Fine not found.')
+        return redirect('core:librarian_fines')
+    return render(request, 'librarian/fines.html', {
+        'fines': fines, 'total_pending': total_pending, 'total_paid': total_paid,
+    })
 
 
 @login_required

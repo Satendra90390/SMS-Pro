@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Issue Records — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/librarian_sidebar.html' with active='issues' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div><h1>Issue Records</h1><div class="subtitle">Track all book issues and returns</div></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="list" style="width:18px;height:18px;"></i> All Issues</div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <div class="filter-tabs">
+                        <a href="{% url 'core:librarian_issues' %}" class="filter-tab {% if not status_filter %}active{% endif %}">All</a>
+                        <a href="{% url 'core:librarian_issues' %}?status=Issued" class="filter-tab {% if status_filter == 'Issued' %}active{% endif %}">Issued</a>
+                        <a href="{% url 'core:librarian_issues' %}?status=Returned" class="filter-tab {% if status_filter == 'Returned' %}active{% endif %}">Returned</a>
+                        <a href="{% url 'core:librarian_issues' %}?status=Overdue" class="filter-tab {% if status_filter == 'Overdue' %}active{% endif %}">Overdue</a>
+                    </div>
+                    <form class="search-form" method="GET" style="margin:0;">
+                        <input type="text" name="q" value="{{ q }}" placeholder="Search..." style="padding:8px 12px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--r-sm);color:var(--text-primary);font-size:13px;width:160px;">
+                        <button type="submit" class="btn btn-sm btn-primary">Search</button>
+                    </form>
+                </div>
+            </div>
+            {% if issues %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Book</th><th>Student</th><th>Issued By</th><th>Issue Date</th><th>Due Date</th><th>Return Date</th><th>Fine</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody>
+                    {% for i in issues %}
+                    <tr>
+                        <td><strong>{{ i.book.title }}</strong></td>
+                        <td>{{ i.student.name }}</td>
+                        <td>{{ i.issued_by.username|default:"—" }}</td>
+                        <td>{{ i.issue_date }}</td>
+                        <td>{{ i.due_date }}</td>
+                        <td>{{ i.return_date|default:"—" }}</td>
+                        <td>{% if i.fine_amount > 0 %}<span class="badge badge-red">&#8377;{{ i.fine_amount }}</span>{% else %}—{% endif %}</td>
+                        <td>
+                            {% if i.status == 'Issued' %}<span class="badge badge-yellow">{{ i.status }}</span>
+                            {% elif i.status == 'Returned' %}<span class="badge badge-green">{{ i.status }}</span>
+                            {% else %}<span class="badge badge-red">{{ i.status }}</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if i.status != 'Returned' %}
+                            <form method="POST" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="return">
+                                <input type="hidden" name="return_id" value="{{ i.id }}">
+                                <button class="btn btn-sm btn-primary">Return</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state"><div class="empty-icon"><i data-lucide="list" style="width:40px;height:40px;"></i></div><h3>No Records</h3></div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -301,10 +301,12 @@ class BookIssue(models.Model):
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name='book_issues')
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='issues')
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='book_issues')
+    issued_by = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='issued_books')
     issue_date = models.DateField()
     due_date = models.DateField()
     return_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Issued')
+    fine_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     class Meta:
         db_table = 'book_issues'
@@ -312,6 +314,24 @@ class BookIssue(models.Model):
 
     def __str__(self):
         return f"{self.student.name} - {self.book.title} ({self.status})"
+
+
+class BookFine(models.Model):
+    STATUS_CHOICES = [('Pending', 'Pending'), ('Paid', 'Paid')]
+    institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name='book_fines')
+    issue = models.ForeignKey(BookIssue, on_delete=models.CASCADE, related_name='fines')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='book_fines')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    reason = models.CharField(max_length=200, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'book_fines'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Fine: {self.student.name} - ₹{self.amount} ({self.status})"
 
 
 class Event(models.Model):

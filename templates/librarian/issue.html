@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Issue Book — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/librarian_sidebar.html' with active='issue' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div><h1>Issue Book</h1><div class="subtitle">Issue a book to a student or teacher</div></div>
+        </div>
+        <div class="card" style="max-width:600px;">
+            <div class="card-header"><div class="card-title"><i data-lucide="arrow-up-from-line" style="width:18px;height:18px;"></i> Issue Details</div></div>
+            <form method="POST" class="auth-form">{% csrf_token %}
+                <div class="form-group">
+                    <label>Book <span style="color:var(--danger);">*</span></label>
+                    <select name="book" required style="width:100%;padding:10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--r-sm);color:var(--text-primary);font-size:14px;">
+                        <option value="">Select book</option>
+                        {% for b in books %}
+                        <option value="{{ b.id }}">{{ b.title }} by {{ b.author }} ({{ b.available_copies }} available)</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Student/Teacher <span style="color:var(--danger);">*</span></label>
+                    <select name="person" required style="width:100%;padding:10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--r-sm);color:var(--text-primary);font-size:14px;">
+                        <option value="">Select person</option>
+                        {% for p in people %}
+                        <option value="{{ p.id }}">{{ p.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group"><label>Due Date <span style="color:var(--danger);">*</span></label><input type="date" name="due_date" required></div>
+                <div class="form-actions" style="margin-top:16px;">
+                    <a href="{% url 'core:librarian_issues' %}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Issue Book</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+{% endblock %}

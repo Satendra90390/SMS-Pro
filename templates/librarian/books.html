@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Books — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/librarian_sidebar.html' with active='books' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Books</h1>
+                <div class="subtitle">Manage library inventory</div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <a href="{% url 'core:librarian_add_book' %}" class="quick-action-btn" style="background:var(--brand);color:white;"><i data-lucide="plus" style="width:18px;height:18px;"></i> Add Book</a>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="book-open" style="width:18px;height:18px;"></i> All Books</div>
+                <form class="search-form" method="GET" style="margin:0;">
+                    <input type="text" name="q" value="{{ q }}" placeholder="Search by title, author, ISBN..." style="padding:8px 12px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--r-sm);color:var(--text-primary);font-size:13px;width:220px;">
+                    <button type="submit" class="btn btn-sm btn-primary">Search</button>
+                </form>
+            </div>
+            {% if books %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Title</th><th>Author</th><th>ISBN</th><th>Category</th><th>Available</th><th>Total</th><th>Actions</th></tr></thead>
+                    <tbody>
+                    {% for b in books %}
+                    <tr>
+                        <td><strong>{{ b.title }}</strong></td>
+                        <td>{{ b.author }}</td>
+                        <td>{{ b.isbn|default:"—" }}</td>
+                        <td>{{ b.category|default:"—" }}</td>
+                        <td><span class="badge {% if b.available_copies > 0 %}badge-green{% else %}badge-red{% endif %}">{{ b.available_copies }}</span></td>
+                        <td>{{ b.total_copies }}</td>
+                        <td>
+                            <a href="{% url 'core:librarian_edit_book' book_id=b.id %}" class="btn btn-sm btn-primary">Edit</a>
+                            <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this book?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="delete_id" value="{{ b.id }}">
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state"><div class="empty-icon"><i data-lucide="book-open" style="width:40px;height:40px;"></i></div><h3>No Books</h3><p>Add books to start managing your library.</p></div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Fines — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/librarian_sidebar.html' with active='fines' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div><h1>Library Fines</h1><div class="subtitle">Manage fines for overdue or damaged books</div></div>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:rgba(239,68,68,0.15);color:#ef4444;"><i data-lucide="alert-triangle" style="width:22px;height:22px;"></i></div>
+                <div class="stat-info"><div class="stat-val">&#8377;{{ total_pending|floatformat:0 }}</div><div class="stat-label">Pending Fines</div></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:rgba(16,185,129,0.15);color:#22c55e;"><i data-lucide="check-circle" style="width:22px;height:22px;"></i></div>
+                <div class="stat-info"><div class="stat-val">&#8377;{{ total_paid|floatformat:0 }}</div><div class="stat-label">Collected</div></div>
+            </div>
+        </div>
+
+        <div class="card" style="max-width:600px;margin-bottom:20px;">
+            <div class="card-header"><div class="card-title"><i data-lucide="plus-circle" style="width:18px;height:18px;"></i> Add Fine</div></div>
+            <form method="POST" class="auth-form">{% csrf_token %}
+                <input type="hidden" name="action" value="add">
+                <div class="form-group">
+                    <label>Issue Record <span style="color:var(--danger);">*</span></label>
+                    <select name="issue_id" required style="width:100%;padding:10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--r-sm);color:var(--text-primary);font-size:14px;">
+                        <option value="">Select issue record</option>
+                        {% for i in fines %}
+                        {% if i.status == 'Pending' %}
+                        <option value="{{ i.issue.id }}">{{ i.student.name }} — {{ i.issue.book.title }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Amount (₹) <span style="color:var(--danger);">*</span></label><input type="number" name="amount" min="1" step="0.01" required></div>
+                    <div class="form-group"><label>Reason</label><input type="text" name="reason" placeholder="e.g. Late return, Damaged book"></div>
+                </div>
+                <div class="form-actions"><button type="submit" class="btn btn-primary">Add Fine</button></div>
+            </form>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><div class="card-title"><i data-lucide="indian-rupee" style="width:18px;height:18px;"></i> All Fines</div></div>
+            {% if fines %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Student</th><th>Book</th><th>Amount</th><th>Reason</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody>
+                    {% for f in fines %}
+                    <tr>
+                        <td><strong>{{ f.student.name }}</strong></td>
+                        <td>{{ f.issue.book.title }}</td>
+                        <td><span class="badge badge-red">&#8377;{{ f.amount }}</span></td>
+                        <td>{{ f.reason|default:"—" }}</td>
+                        <td>
+                            {% if f.status == 'Pending' %}<span class="badge badge-yellow">Pending</span>
+                            {% else %}<span class="badge badge-green">Paid</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if f.status == 'Pending' %}
+                            <form method="POST" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="pay">
+                                <input type="hidden" name="fine_id" value="{{ f.id }}">
+                                <button class="btn btn-sm btn-primary">Mark Paid</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state"><div class="empty-icon"><i data-lucide="indian-rupee" style="width:40px;height:40px;"></i></div><h3>No Fines</h3></div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}
