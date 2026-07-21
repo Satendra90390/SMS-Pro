@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Add Subject — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/admin_sidebar.html' with active='courses' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Add Subject</h1>
+                <div class="subtitle">{{ course.name }}{% if branch %} — {{ branch.name }}{% endif %}</div>
+            </div>
+        </div>
+
+        <div class="card" style="max-width:600px;">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="plus-circle" style="width:18px;height:18px;"></i> Subject Details</div>
+            </div>
+            <form method="POST" class="auth-form">{% csrf_token %}
+                <div class="form-group">
+                    <label>Name <span style="color:var(--danger);">*</span></label>
+                    <input type="text" name="name" placeholder="e.g. Data Structures, Engineering Mathematics" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Code</label>
+                        <input type="text" name="code" placeholder="e.g. CS101, MA101">
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select name="subject_type" style="width:100%;padding:10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--r-sm);color:var(--text-primary);font-size:14px;">
+                            <option value="Theory">Theory</option>
+                            <option value="Lab">Lab</option>
+                            <option value="Practical">Practical</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Year</label>
+                        <select name="year" style="width:100%;padding:10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--r-sm);color:var(--text-primary);font-size:14px;">
+                            <option value="">None</option>
+                            <option value="1">Year 1</option>
+                            <option value="2">Year 2</option>
+                            <option value="3">Year 3</option>
+                            <option value="4">Year 4</option>
+                            <option value="5">Year 5</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Semester</label>
+                        <select name="semester" style="width:100%;padding:10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--r-sm);color:var(--text-primary);font-size:14px;">
+                            <option value="">None</option>
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Credits</label>
+                    <input type="number" name="credits" value="0" min="0" max="10">
+                </div>
+                <div class="form-actions" style="margin-top:16px;">
+                    <a href="{% url 'core:admin_subjects_manage' course_id=course.id %}{% if branch %}?branch_id={{ branch.id }}{% endif %}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Add Subject</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -18,13 +18,21 @@
         <a href="{% url 'core:admin_add_student' %}" {% if active == 'add_student' %}class="active"{% endif %}><span class="icon"><i data-lucide="user-plus" style="width:18px;height:18px;"></i></span> Add Student</a>
         <a href="{% url 'core:admin_faculty' %}" {% if active == 'faculty' %}class="active"{% endif %}><span class="icon"><i data-lucide="users" style="width:18px;height:18px;"></i></span> Manage Faculty</a>
         <a href="{% url 'core:admin_add_faculty' %}" {% if active == 'add_faculty' %}class="active"{% endif %}><span class="icon"><i data-lucide="user-plus" style="width:18px;height:18px;"></i></span> Add Faculty</a>
-        <a href="{% url 'core:admin_subjects' %}" {% if active == 'subjects' %}class="active"{% endif %}><span class="icon"><i data-lucide="book-open" style="width:18px;height:18px;"></i></span> Manage Subjects</a>
-        <a href="{% url 'core:admin_reports' %}" {% if active == 'reports' %}class="active"{% endif %}><span class="icon"><i data-lucide="file-text" style="width:18px;height:18px;"></i></span> Reports</a>
+
+        {% if institution.inst_type == 'School' %}
+        <a href="{% url 'core:admin_courses' %}" {% if active == 'courses' %}class="active"{% endif %}><span class="icon"><i data-lucide="book-open" style="width:18px;height:18px;"></i></span> Classes</a>
+        {% elif institution.inst_type == 'Coaching' %}
+        <a href="{% url 'core:admin_courses' %}" {% if active == 'courses' %}class="active"{% endif %}><span class="icon"><i data-lucide="book-open" style="width:18px;height:18px;"></i></span> Courses</a>
+        {% else %}
+        <a href="{% url 'core:admin_courses' %}" {% if active == 'courses' %}class="active"{% endif %}><span class="icon"><i data-lucide="book-open" style="width:18px;height:18px;"></i></span> {% if institution.inst_type == 'University' %}Departments & Courses{% else %}Courses{% endif %}</a>
+        {% endif %}
+
+        <a href="{% url 'core:admin_subjects' %}" {% if active == 'subjects' %}class="active"{% endif %}><span class="icon"><i data-lucide="layers" style="width:18px;height:18px;"></i></span> Faculty Assignments</a>
         <a href="{% url 'core:admin_exams' %}" {% if active == 'exams' %}class="active"{% endif %}><span class="icon"><i data-lucide="clipboard-check" style="width:18px;height:18px;"></i></span> Exams</a>
-        <a href="{% url 'core:admin_fees' %}" {% if active == 'fees' %}class="active"{% endif %}><span class="icon"><i data-lucide="indian-rupee" style="width:18px;height:18px;"></i></span> Fees Management</a>
+        <a href="{% url 'core:admin_fees' %}" {% if active == 'fees' %}class="active"{% endif %}><span class="icon"><i data-lucide="indian-rupee" style="width:18px;height:18px;"></i></span> Fees</a>
         <a href="{% url 'core:admin_books' %}" {% if active == 'books' %}class="active"{% endif %}><span class="icon"><i data-lucide="library" style="width:18px;height:18px;"></i></span> Library</a>
         <a href="{% url 'core:admin_events' %}" {% if active == 'events' %}class="active"{% endif %}><span class="icon"><i data-lucide="calendar" style="width:18px;height:18px;"></i></span> Events</a>
-        <a href="{% url 'core:admin_analytics' %}" {% if active == 'analytics' %}class="active"{% endif %}><span class="icon"><i data-lucide="bar-chart-3" style="width:18px;height:18px;"></i></span> System Analytics</a>
+        <a href="{% url 'core:admin_analytics' %}" {% if active == 'analytics' %}class="active"{% endif %}><span class="icon"><i data-lucide="bar-chart-3" style="width:18px;height:18px;"></i></span> Analytics</a>
     </div>
     <div class="sidebar-footer">
         <a href="{% url 'accounts:profile' %}" class="btn btn-secondary btn-block btn-sm" style="margin-bottom:8px;"><i data-lucide="user" style="width:14px;height:14px;"></i> My Profile</a>

@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.db.models import Count, Sum, Q
 from datetime import date, timedelta
 from .models import (
-    Institution, Student, Faculty, Course, FacultyTeaching,
+    Institution, Student, Faculty, Course, Branch, Subject, FacultyTeaching,
     StudentCourse, Result, Attendance, Fee, Parent, AuditLog,
     Exam, ExamResult, Book, BookIssue, Event,
 )
@@ -170,6 +170,161 @@ def admin_subjects(request):
     courses = Course.objects.filter(institution=inst)
     teachings = FacultyTeaching.objects.filter(institution=inst).select_related('faculty', 'course')
     return render(request, 'admin_panel/subjects.html', {'courses': courses, 'teachings': teachings})
+
+
+# ─── ACADEMIC STRUCTURE VIEWS (conditional on inst_type) ────────
+
+@login_required
+def admin_courses(request):
+    if request.user.role != 'admin':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    courses = Course.objects.filter(institution=inst).order_by('name')
+    q = request.GET.get('q', '').strip()
+    if q:
+        courses = courses.filter(Q(name__icontains=q) | Q(code__icontains=q) | Q(department__icontains=q))
+    if request.method == 'POST' and request.POST.get('delete_id'):
+        cid = request.POST.get('delete_id')
+        try:
+            c = Course.objects.get(pk=cid, institution=inst)
+            log_audit(request.user, 'delete_course', f"Deleted course {c.name}", 'courses')
+            c.delete()
+            messages.success(request, f'Course "{c.name}" deleted.')
+        except Course.DoesNotExist:
+            messages.error(request, 'Course not found.')
+        return redirect('core:admin_courses')
+    return render(request, 'admin_panel/courses.html', {'courses': courses, 'q': q})
+
+
+@login_required
+def admin_add_course(request):
+    if request.user.role != 'admin':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        code = request.POST.get('code', '').strip()
+        department = request.POST.get('department', '').strip()
+        description = request.POST.get('description', '').strip()
+        if not name:
+            messages.error(request, 'Course name is required.')
+            return render(request, 'admin_panel/add_course.html')
+        if Course.objects.filter(institution=inst, name__iexact=name).exists():
+            messages.error(request, 'A course with this name already exists.')
+            return render(request, 'admin_panel/add_course.html')
+        Course.objects.create(
+            institution=inst, name=name, code=code,
+            department=department, description=description,
+        )
+        log_audit(request.user, 'add_course', f"Added course {name}", 'courses')
+        messages.success(request, f'Course "{name}" created.')
+        return redirect('core:admin_courses')
+    return render(request, 'admin_panel/add_course.html')
+
+
+@login_required
+def admin_branches(request, course_id):
+    if request.user.role != 'admin':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    course = get_object_or_404(Course, pk=course_id, institution=inst)
+    branches = Branch.objects.filter(course=course).order_by('name')
+    if request.method == 'POST' and request.POST.get('delete_id'):
+        bid = request.POST.get('delete_id')
+        try:
+            b = Branch.objects.get(pk=bid, course=course, institution=inst)
+            log_audit(request.user, 'delete_branch', f"Deleted branch {b.name} from {course.name}", 'branches')
+            b.delete()
+            messages.success(request, f'Branch "{b.name}" deleted.')
+        except Branch.DoesNotExist:
+            messages.error(request, 'Branch not found.')
+        return redirect('core:admin_branches', course_id=course.id)
+    return render(request, 'admin_panel/branches.html', {'course': course, 'branches': branches})
+
+
+@login_required
+def admin_add_branch(request, course_id):
+    if request.user.role != 'admin':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    course = get_object_or_404(Course, pk=course_id, institution=inst)
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        code = request.POST.get('code', '').strip()
+        if not name:
+            messages.error(request, 'Branch name is required.')
+            return render(request, 'admin_panel/add_branch.html', {'course': course})
+        Branch.objects.create(institution=inst, course=course, name=name, code=code)
+        log_audit(request.user, 'add_branch', f"Added branch {name} to {course.name}", 'branches')
+        messages.success(request, f'Branch "{name}" added to {course.name}.')
+        return redirect('core:admin_branches', course_id=course.id)
+    return render(request, 'admin_panel/add_branch.html', {'course': course})
+
+
+@login_required
+def admin_subjects_manage(request, course_id, branch_id=None):
+    if request.user.role != 'admin':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    course = get_object_or_404(Course, pk=course_id, institution=inst)
+    branch = None
+    if branch_id:
+        branch = get_object_or_404(Branch, pk=branch_id, course=course, institution=inst)
+    subjects = Subject.objects.filter(course=course, institution=inst)
+    if branch:
+        subjects = subjects.filter(branch=branch)
+    else:
+        subjects = subjects.filter(branch__isnull=True)
+    subjects = subjects.order_by('year', 'semester', 'name')
+    years = sorted(set(s.year for s in subjects if s.year))
+    if request.method == 'POST' and request.POST.get('delete_id'):
+        sid = request.POST.get('delete_id')
+        try:
+            s = Subject.objects.get(pk=sid, institution=inst)
+            log_audit(request.user, 'delete_subject', f"Deleted subject {s.name}", 'subjects')
+            s.delete()
+            messages.success(request, f'Subject "{s.name}" deleted.')
+        except Subject.DoesNotExist:
+            messages.error(request, 'Subject not found.')
+        redirect_args = {'course_id': course.id}
+        if branch:
+            redirect_args['branch_id'] = branch.id
+        return redirect('core:admin_subjects_manage', **redirect_args)
+    ctx = {'course': course, 'branch': branch, 'subjects': subjects, 'years': years}
+    return render(request, 'admin_panel/subjects_manage.html', ctx)
+
+
+@login_required
+def admin_add_subject(request, course_id, branch_id=None):
+    if request.user.role != 'admin':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    course = get_object_or_404(Course, pk=course_id, institution=inst)
+    branch = None
+    if branch_id:
+        branch = get_object_or_404(Branch, pk=branch_id, course=course, institution=inst)
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        code = request.POST.get('code', '').strip()
+        subject_type = request.POST.get('subject_type', 'Theory')
+        year = request.POST.get('year', '').strip()
+        semester = request.POST.get('semester', '').strip()
+        credits = request.POST.get('credits', 0)
+        if not name:
+            messages.error(request, 'Subject name is required.')
+            return render(request, 'admin_panel/add_subject.html', {'course': course, 'branch': branch})
+        Subject.objects.create(
+            institution=inst, course=course, branch=branch,
+            name=name, code=code, subject_type=subject_type,
+            year=year, semester=semester, credits=int(credits),
+        )
+        log_audit(request.user, 'add_subject', f"Added subject {name} to {course.name}", 'subjects')
+        messages.success(request, f'Subject "{name}" added.')
+        redirect_args = {'course_id': course.id}
+        if branch:
+            redirect_args['branch_id'] = branch.id
+        return redirect('core:admin_subjects_manage', **redirect_args)
+    return render(request, 'admin_panel/add_subject.html', {'course': course, 'branch': branch})
 
 
 @login_required

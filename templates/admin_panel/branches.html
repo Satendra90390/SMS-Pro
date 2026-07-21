@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Branches — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/admin_sidebar.html' with active='courses' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>{{ course.name }} — Branches</h1>
+                <div class="subtitle">Manage branches/specializations</div>
+            </div>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="git-branch" style="width:22px;height:22px;"></i></div>
+                <div class="stat-info"><div class="stat-val">{{ branches.count }}</div><div class="stat-label">Branches</div></div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <a href="{% url 'core:admin_add_branch' course_id=course.id %}" class="quick-action-btn" style="background:var(--brand);color:white;"><i data-lucide="plus" style="width:18px;height:18px;"></i> Add Branch</a>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="git-branch" style="width:18px;height:18px;"></i> Branches</div>
+            </div>
+            {% if branches %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Name</th><th>Code</th><th>Subjects</th><th>Actions</th></tr></thead>
+                    <tbody>
+                    {% for b in branches %}
+                    <tr>
+                        <td><strong>{{ b.name }}</strong></td>
+                        <td>{{ b.code|default:"—" }}</td>
+                        <td><span class="badge badge-blue">{{ b.subjects.count }} subjects</span></td>
+                        <td>
+                            <a href="{% url 'core:admin_branch_subjects' course_id=course.id branch_id=b.id %}" class="btn btn-sm btn-primary">Subjects</a>
+                            <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this branch?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="delete_id" value="{{ b.id }}">
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon"><i data-lucide="git-branch" style="width:40px;height:40px;"></i></div>
+                <h3>No Branches Yet</h3>
+                <p>Add branches/specializations for {{ course.name }}.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

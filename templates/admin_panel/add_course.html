@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Add Course — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/admin_sidebar.html' with active='courses' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Add {% if institution.inst_type == 'School' %}Class{% else %}Course{% endif %}</h1>
+                <div class="subtitle">Create a new {% if institution.inst_type == 'School' %}class{% else %}course{% endif %}</div>
+            </div>
+        </div>
+
+        <div class="card" style="max-width:600px;">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="plus-circle" style="width:18px;height:18px;"></i> {% if institution.inst_type == 'School' %}Class{% else %}Course{% endif %} Details</div>
+            </div>
+            <form method="POST" class="auth-form">{% csrf_token %}
+                <div class="form-group">
+                    <label>Name <span style="color:var(--danger);">*</span></label>
+                    {% if institution.inst_type == 'School' %}
+                    <input type="text" name="name" placeholder="e.g. Class 10, Class 12" required>
+                    {% elif institution.inst_type == 'Coaching' %}
+                    <input type="text" name="name" placeholder="e.g. JEE Main, NEET, Foundation" required>
+                    {% else %}
+                    <input type="text" name="name" placeholder="e.g. B.Tech, B.Pharm, M.Sc, Polytechnic" required>
+                    {% endif %}
+                </div>
+                {% if institution.inst_type != 'School' %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Code</label>
+                        <input type="text" name="code" placeholder="e.g. BTECH, BPHARM">
+                    </div>
+                    <div class="form-group">
+                        <label>Department</label>
+                        <input type="text" name="department" placeholder="e.g. Engineering, Pharmacy">
+                    </div>
+                </div>
+                {% endif %}
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3" placeholder="Optional description..." style="width:100%;padding:10px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:var(--r-sm);color:var(--text-primary);font-size:14px;font-family:inherit;"></textarea>
+                </div>
+                <div class="form-actions" style="margin-top:16px;">
+                    <a href="{% url 'core:admin_courses' %}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Create {% if institution.inst_type == 'School' %}Class{% else %}Course{% endif %}</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+{% endblock %}

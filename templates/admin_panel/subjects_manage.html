@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Subjects — Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/admin_sidebar.html' with active='courses' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>{{ course.name }}{% if branch %} — {{ branch.name }}{% endif %} — Subjects</h1>
+                <div class="subtitle">{% if branch %}Subjects for {{ branch.name }} branch{% else %}Subjects for {{ course.name }}{% endif %}</div>
+            </div>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="layers" style="width:22px;height:22px;"></i></div>
+                <div class="stat-info"><div class="stat-val">{{ subjects.count }}</div><div class="stat-label">Subjects</div></div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <a href="{% url 'core:admin_add_subject' course_id=course.id %}{% if branch %}?branch_id={{ branch.id }}{% endif %}" class="quick-action-btn" style="background:var(--brand);color:white;"><i data-lucide="plus" style="width:18px;height:18px;"></i> Add Subject</a>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i data-lucide="layers" style="width:18px;height:18px;"></i> Subjects</div>
+            </div>
+            {% if subjects %}
+            {% for year in years %}
+            <div style="padding:12px 20px;border-bottom:1px solid var(--border);">
+                <strong style="color:var(--text-secondary);font-size:13px;text-transform:uppercase;">Year {{ year }}</strong>
+            </div>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Subject</th><th>Code</th><th>Type</th><th>Semester</th><th>Credits</th><th>Action</th></tr></thead>
+                    <tbody>
+                    {% for s in subjects %}
+                    {% if s.year == year %}
+                    <tr>
+                        <td><strong>{{ s.name }}</strong></td>
+                        <td>{{ s.code|default:"—" }}</td>
+                        <td>
+                            {% if s.subject_type == 'Lab' %}<span class="badge badge-purple">{{ s.subject_type }}</span>
+                            {% elif s.subject_type == 'Practical' %}<span class="badge badge-yellow">{{ s.subject_type }}</span>
+                            {% else %}<span class="badge badge-blue">{{ s.subject_type }}</span>{% endif %}
+                        </td>
+                        <td>{{ s.semester|default:"—" }}</td>
+                        <td>{{ s.credits }}</td>
+                        <td>
+                            <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this subject?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="delete_id" value="{{ s.id }}">
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon"><i data-lucide="layers" style="width:40px;height:40px;"></i></div>
+                <h3>No Subjects Yet</h3>
+                <p>Add subjects to organize your curriculum.</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

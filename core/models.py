@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Institution(models.Model):
@@ -59,7 +60,10 @@ class Faculty(models.Model):
 class Course(models.Model):
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name='courses')
     name = models.CharField(max_length=200)
+    code = models.CharField(max_length=20, blank=True)
     department = models.CharField(max_length=100, blank=True)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         db_table = 'courses'
@@ -67,6 +71,44 @@ class Course(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Branch(models.Model):
+    institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name='branches')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='branches')
+    name = models.CharField(max_length=200)
+    code = models.CharField(max_length=20, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'branches'
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.course.name} - {self.name}"
+
+
+class Subject(models.Model):
+    TYPE_CHOICES = [('Theory', 'Theory'), ('Lab', 'Lab'), ('Practical', 'Practical')]
+    institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name='subjects')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='subjects')
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, null=True, blank=True, related_name='subjects')
+    name = models.CharField(max_length=200)
+    code = models.CharField(max_length=20, blank=True)
+    subject_type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='Theory')
+    year = models.CharField(max_length=50, blank=True)
+    semester = models.CharField(max_length=50, blank=True)
+    credits = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'subjects'
+        ordering = ['year', 'semester', 'name']
+
+    def __str__(self):
+        branch_part = f" ({self.branch.name})" if self.branch else ""
+        year_part = f" Y{self.year} S{self.semester}" if self.year else ""
+        return f"{self.name}{branch_part}{year_part}"
 
 
 class FacultyTeaching(models.Model):
