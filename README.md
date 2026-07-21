@@ -2,7 +2,7 @@
 
 > A full-featured, multi-tenant student management platform for educational institutions.
 
-**Live Demo:** [sms-pro.onrender.com](https://sms-pro.onrender.com/)
+**Live Demo:** [edosaic.onrender.com](https://edosaic.onrender.com/)
 
 ---
 
