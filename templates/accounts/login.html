@@ -117,7 +117,8 @@
             </form>
 
             <div class="auth-footer">
-                Don't have an institution? <a href="{% url 'accounts:register' %}">Register Now</a>
+                Don't have an account? <a href="{% url 'accounts:self_register' %}">Sign Up</a>
+                <br><span style="font-size:12px;margin-top:4px;display:inline-block;">Admin? <a href="{% url 'accounts:register' %}">Register Institution</a></span>
             </div>
 
             {% if messages %}

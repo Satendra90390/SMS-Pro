@@ -47,7 +47,7 @@
         </div>
         <div class="nav-actions">
             <a href="{% url 'accounts:login' %}" class="btn btn-nav-login">Login</a>
-            <a href="{% url 'accounts:register' %}" class="btn btn-nav-register">Register</a>
+            <a href="{% url 'accounts:self_register' %}" class="btn btn-nav-register">Sign Up</a>
         </div>
         <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">&#9776;</button>
     </div>
@@ -61,7 +61,7 @@
             <h1>Streamline Your <span class="hero-gradient-text">Educational Institution</span></h1>
             <p class="hero-sub">Complete student management solution for modern schools. Manage students, faculty, attendance, grades, and fees — all in one powerful platform.</p>
             <div class="hero-actions">
-                <a href="{% url 'accounts:register' %}" class="btn btn-hero-primary">Get Started &#8594;</a>
+                <a href="{% url 'accounts:self_register' %}" class="btn btn-hero-primary">Get Started &#8594;</a>
                 <a href="#features" class="btn btn-hero-outline">Learn More</a>
             </div>
             <div class="hero-stats">
@@ -226,7 +226,7 @@
                     <li>Multi-institution support with data isolation</li>
                     <li>Secure authentication and data encryption</li>
                 </ul>
-                <a href="{% url 'accounts:register' %}" class="btn btn-hero-primary" style="margin-top:20px;">Start Free Trial &#8594;</a>
+                <a href="{% url 'accounts:self_register' %}" class="btn btn-hero-primary" style="margin-top:20px;">Start Free Trial &#8594;</a>
             </div>
             <div class="about-visual">
                 <div class="about-card">
@@ -313,7 +313,7 @@
                 <p>Set up your institution in under 5 minutes. Free for small institutions. No credit card required.</p>
             </div>
             <div class="cta-actions">
-                <a href="{% url 'accounts:register' %}" class="btn btn-hero-primary">Get Started Free <i data-lucide="arrow-right" style="width:18px;height:18px;"></i></a>
+                <a href="{% url 'accounts:self_register' %}" class="btn btn-hero-primary">Get Started Free <i data-lucide="arrow-right" style="width:18px;height:18px;"></i></a>
                 <a href="{% url 'accounts:login' %}" class="btn btn-hero-outline">Sign In</a>
             </div>
         </div>

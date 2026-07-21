@@ -1,10 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import User
 from core.models import Institution, Student, Faculty, Parent
 from django.db import transaction
+from django.http import JsonResponse
 
 
 def landing_page(request):
@@ -137,3 +138,90 @@ def profile_view(request):
         return redirect('accounts:landing')
 
     return render(request, 'accounts/profile.html', {'profile_data': profile_data})
+
+
+def self_register(request):
+    if request.user.is_authenticated:
+        return redirect('core:dashboard')
+    institutions = Institution.objects.filter(is_active=True).order_by('name')
+
+    if request.method == 'POST':
+        role = request.POST.get('role', '').strip()
+        inst_id = request.POST.get('institution', '')
+        full_name = request.POST.get('full_name', '').strip()
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        confirm = request.POST.get('confirm_password', '')
+        phone = request.POST.get('phone', '').strip()
+
+        form_data = {
+            'role': role, 'full_name': full_name, 'username': username,
+            'phone': phone, 'inst_id': inst_id,
+        }
+
+        errors = []
+        if role not in ['student', 'faculty', 'parent', 'accountant']:
+            errors.append('Please select a valid role.')
+        if not inst_id:
+            errors.append('Please select your institution.')
+        if not full_name:
+            errors.append('Full name is required.')
+        if not username:
+            errors.append('Username is required.')
+        if User.objects.filter(username=username).exists():
+            errors.append('Username already taken.')
+        if len(password) < 6:
+            errors.append('Password must be at least 6 characters.')
+        if password != confirm:
+            errors.append('Passwords do not match.')
+
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+            return render(request, 'accounts/self_register.html', {**form_data, 'institutions': institutions})
+
+        institution = get_object_or_404(Institution, pk=inst_id, is_active=True)
+        user = User.objects.create_user(
+            username=username, password=password,
+            role=role, institution=institution, first_name=full_name,
+            phone=phone,
+        )
+
+        if role == 'student':
+            age = request.POST.get('age', 18)
+            sex = request.POST.get('sex', 'Male')
+            Student.objects.create(
+                institution=institution, user=user,
+                name=full_name, age=int(age) if age else 18,
+                sex=sex, phone=phone,
+            )
+        elif role == 'faculty':
+            department = request.POST.get('department', '').strip()
+            qualification = request.POST.get('qualification', '').strip()
+            email = request.POST.get('email', '').strip()
+            Faculty.objects.create(
+                institution=institution, user=user,
+                name=full_name, department=department,
+                phone=phone, qualification=qualification, email=email,
+            )
+        elif role == 'parent':
+            email = request.POST.get('email', '').strip()
+            relationship = request.POST.get('relationship', '').strip()
+            child_name = request.POST.get('child_name', '').strip()
+            child = None
+            if child_name:
+                child = Student.objects.filter(
+                    institution=institution, name__icontains=child_name
+                ).first()
+            if child:
+                Parent.objects.create(
+                    institution=institution, user=user,
+                    name=full_name, phone=phone, email=email,
+                    relationship=relationship, child=child,
+                )
+
+        login(request, user)
+        messages.success(request, f'Welcome to Edosaic, {full_name}!')
+        return redirect('core:dashboard')
+
+    return render(request, 'accounts/self_register.html', {'institutions': institutions})
