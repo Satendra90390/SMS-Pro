@@ -105,7 +105,7 @@
                     <div class="form-group">
                         <label>Institution Name <span class="required">*</span></label>
                         <div class="input-wrap">
-                            <input type="text" name="inst_name" placeholder="e.g. Delhi Public School" value="{{ inst_name|default:'' }}" required>
+                            <input type="text" name="inst_name" placeholder="e.g. Delhi Public School" value="{{ inst_name|default:'' }}">
                             <span class="input-icon"><i data-lucide="building-2" style="width:18px;height:18px;"></i></span>
                         </div>
                     </div>
@@ -126,7 +126,7 @@
                     <div class="form-group">
                         <label>Phone <span class="required">*</span></label>
                         <div class="input-wrap">
-                            <input type="text" name="inst_phone" placeholder="+91 98765 43210" value="{{ inst_phone|default:'' }}" required>
+                            <input type="text" name="inst_phone" placeholder="+91 98765 43210" value="{{ inst_phone|default:'' }}">
                             <span class="input-icon"><i data-lucide="phone" style="width:18px;height:18px;"></i></span>
                         </div>
                     </div>
@@ -164,7 +164,7 @@
                     <div class="form-group">
                         <label>Full Name <span class="required">*</span></label>
                         <div class="input-wrap">
-                            <input type="text" name="admin_name" placeholder="e.g. Rajesh Kumar" value="{{ admin_name|default:'' }}" required>
+                            <input type="text" name="admin_name" placeholder="e.g. Rajesh Kumar" value="{{ admin_name|default:'' }}">
                             <span class="input-icon"><i data-lucide="user" style="width:18px;height:18px;"></i></span>
                         </div>
                     </div>
@@ -172,7 +172,7 @@
                     <div class="form-group">
                         <label>Username <span class="required">*</span></label>
                         <div class="input-wrap">
-                            <input type="text" name="admin_username" placeholder="Choose a username" value="{{ admin_username|default:'' }}" required>
+                            <input type="text" name="admin_username" placeholder="Choose a username" value="{{ admin_username|default:'' }}">
                             <span class="input-icon"><i data-lucide="at-sign" style="width:18px;height:18px;"></i></span>
                         </div>
                     </div>
@@ -180,7 +180,7 @@
                     <div class="form-group">
                         <label>Password <span class="required">*</span></label>
                         <div class="input-wrap">
-                            <input type="password" name="admin_password" id="reg-password" placeholder="Min 6 characters" required oninput="checkStrength(this.value)">
+                            <input type="password" name="admin_password" id="reg-password" placeholder="Min 6 characters" oninput="checkStrength(this.value)">
                             <button type="button" class="password-toggle" onclick="togglePassword('reg-password', this)"><i data-lucide="eye-off" style="width:18px;height:18px;"></i></button>
                         </div>
                         <div class="password-strength" id="strength-bars">
@@ -195,7 +195,7 @@
                     <div class="form-group">
                         <label>Confirm Password <span class="required">*</span></label>
                         <div class="input-wrap">
-                            <input type="password" name="admin_confirm" id="reg-confirm" placeholder="Re-enter password" required>
+                            <input type="password" name="admin_confirm" id="reg-confirm" placeholder="Re-enter password">
                             <button type="button" class="password-toggle" onclick="togglePassword('reg-confirm', this)"><i data-lucide="eye-off" style="width:18px;height:18px;"></i></button>
                         </div>
                     </div>
@@ -204,7 +204,7 @@
                         <button type="button" class="btn btn-secondary" style="flex:0 0 auto;padding:14px 20px;" onclick="goToStep1()">
                             <i data-lucide="arrow-left" style="width:18px;height:18px;"></i>
                         </button>
-                        <button type="submit" class="auth-submit" style="flex:1;">
+                        <button type="button" class="auth-submit" style="flex:1;" onclick="submitRegister()">
                             Create Institution <i data-lucide="check" style="width:18px;height:18px;"></i>
                         </button>
                     </div>
@@ -236,6 +236,10 @@ function togglePassword(inputId, btn) {
 }
 
 function goToStep2() {
+    var name = document.querySelector('[name="inst_name"]').value.trim();
+    var phone = document.querySelector('[name="inst_phone"]').value.trim();
+    if (!name) { document.querySelector('[name="inst_name"]').focus(); return; }
+    if (!phone) { document.querySelector('[name="inst_phone"]').focus(); return; }
     document.getElementById('step1').style.display = 'none';
     document.getElementById('step2').style.display = 'block';
     document.getElementById('step1-ind').classList.remove('active');
@@ -250,6 +254,18 @@ function goToStep1() {
     document.getElementById('step2-ind').classList.remove('active');
     document.getElementById('step1-ind').classList.remove('completed');
     document.getElementById('step1-ind').classList.add('active');
+}
+
+function submitRegister() {
+    var name = document.querySelector('[name="admin_name"]').value.trim();
+    var username = document.querySelector('[name="admin_username"]').value.trim();
+    var pw = document.getElementById('reg-password').value;
+    var confirm = document.getElementById('reg-confirm').value;
+    if (!name) { document.querySelector('[name="admin_name"]').focus(); return; }
+    if (!username) { document.querySelector('[name="admin_username"]').focus(); return; }
+    if (pw.length < 6) { document.getElementById('reg-password').focus(); return; }
+    if (pw !== confirm) { document.getElementById('reg-confirm').focus(); return; }
+    document.getElementById('register-form').submit();
 }
 
 function checkStrength(pw) {
