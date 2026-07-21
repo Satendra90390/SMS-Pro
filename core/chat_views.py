@@ -29,7 +29,7 @@ def build_context(user):
         total = fees.aggregate(t=Sum('amount'))['t'] or 0
         failed = Result.objects.filter(institution=inst, grade__in=['F', 'E', 'D']).count()
         ctx_parts.append(
-            f"You are an AI assistant for '{inst.name}' (SMS Pro). "
+            f"You are an AI assistant for '{inst.name}' (Edosaic). "
             f"Current stats: {student_count} students, {faculty_count} faculty, "
             f"{course_count} courses, {rate}% attendance rate, "
             f"Rs {collected:,} collected of Rs {total:,} total fees, "
@@ -78,7 +78,7 @@ def build_context(user):
             f"You can help with general information about the institution."
         )
 
-    return " ".join(ctx_parts) if ctx_parts else "You are an AI assistant for SMS Pro student management system."
+    return " ".join(ctx_parts) if ctx_parts else "You are an AI assistant for Edosaic student management system."
 
 
 @login_required
@@ -102,7 +102,7 @@ def chat_api(request):
     system_prompt = build_context(request.user)
     history = data.get('history', [])
 
-    messages = [{"role": "system", "content": system_prompt + "\nKeep responses concise and helpful. Use bullet points when listing data. You are part of SMS Pro - a student management system. Only answer questions related to the institution, students, academics, or SMS Pro features. Politely redirect unrelated questions."}]
+    messages = [{"role": "system", "content": system_prompt + "\nKeep responses concise and helpful. Use bullet points when listing data. You are part of Edosaic - a student management system. Only answer questions related to the institution, students, academics, or Edosaic features. Politely redirect unrelated questions."}]
 
     for msg in history:
         role = 'user' if msg.get('role') == 'user' else 'assistant'

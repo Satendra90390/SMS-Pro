@@ -11,7 +11,7 @@ call_command('migrate', '--noinput')
 from django.contrib.sites.models import Site
 Site.objects.get_or_create(id=1, defaults={
     'domain': os.getenv('RENDER_EXTERNAL_HOSTNAME', 'localhost'),
-    'name': 'SMS Pro',
+    'name': 'Edosaic',
 })
 
 from django.contrib.auth import get_user_model

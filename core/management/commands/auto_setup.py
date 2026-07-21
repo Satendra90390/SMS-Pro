@@ -17,11 +17,11 @@ class Command(BaseCommand):
             id=1,
             defaults={
                 'domain': os.getenv('RENDER_EXTERNAL_HOSTNAME', 'localhost'),
-                'name': 'SMS Pro',
+                'name': 'Edosaic',
             }
         )
         site.domain = os.getenv('RENDER_EXTERNAL_HOSTNAME', 'localhost')
-        site.name = 'SMS Pro'
+        site.name = 'Edosaic'
         site.save()
 
         User = get_user_model()

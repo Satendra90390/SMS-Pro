@@ -1,4 +1,4 @@
-# SMS Pro — Student Management System
+# Edosaic — Student Management System
 
 > A full-featured, multi-tenant student management platform for educational institutions.
 
@@ -8,7 +8,7 @@
 
 ## Overview
 
-SMS Pro is a role-based web application built with Django that helps schools, colleges, universities, and coaching centers manage students, faculty, courses, attendance, grades, and fees — all from a single dashboard.
+Edosaic is a role-based web application built with Django that helps schools, colleges, universities, and coaching centers manage students, faculty, courses, attendance, grades, and fees — all from a single dashboard.
 
 It includes **STAN**, an AI assistant powered by Groq's Llama 3.1, context-aware to your institution's data.
 

@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Choose Role — SMS Pro{% endblock %}
+{% block title %}Choose Role — Edosaic{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/auth.css' %}?v=3">{% endblock %}
 {% block body %}
 <nav class="auth-nav">
     <a href="/" class="auth-nav-brand">
         {% include 'components/logo.html' with size=28 %}
-        <span>SMS Pro</span>
+        <span>Edosaic</span>
     </a>
 </nav>
 
@@ -15,7 +15,7 @@
         <div class="auth-card">
             <div class="auth-card-header" style="text-align:center;">
                 <h1>Choose Your Role</h1>
-                <p class="subtitle">How will you be using SMS Pro?</p>
+                <p class="subtitle">How will you be using Edosaic?</p>
             </div>
 
             {% if messages %}
