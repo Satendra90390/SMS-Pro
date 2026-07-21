@@ -3,7 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import User
-from core.models import Institution, Student, Faculty
+from core.models import Institution, Student, Faculty, Parent
+from django.db import transaction
 
 
 def landing_page(request):
@@ -99,3 +100,31 @@ def register_institution(request):
         messages.success(request, 'Institution registered! You can now log in.')
         return redirect('accounts:login')
     return render(request, 'accounts/register.html')
+
+
+@login_required
+def profile_view(request):
+    user = request.user
+    profile_data = None
+    if hasattr(user, 'student_profile'):
+        profile_data = user.student_profile
+    elif hasattr(user, 'faculty_profile'):
+        profile_data = user.faculty_profile
+    elif hasattr(user, 'parent_profile'):
+        profile_data = user.parent_profile
+
+    if request.method == 'POST':
+        confirm = request.POST.get('confirm_username', '')
+        if confirm != user.username:
+            messages.error(request, 'Username does not match. Account was not deleted.')
+            return redirect('accounts:profile')
+        with transaction.atomic():
+            Student.objects.filter(user=user).update(user=None)
+            Faculty.objects.filter(user=user).update(user=None)
+            Parent.objects.filter(user=user).update(user=None)
+            user.delete()
+        logout(request)
+        messages.success(request, 'Your account has been permanently deleted.')
+        return redirect('accounts:landing')
+
+    return render(request, 'accounts/profile.html', {'profile_data': profile_data})

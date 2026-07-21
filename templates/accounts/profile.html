@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block title %}My Profile - Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% if user.role == 'admin' %}
+        {% include 'components/admin_sidebar.html' %}
+    {% elif user.role == 'faculty' %}
+        {% include 'components/faculty_sidebar.html' %}
+    {% elif user.role == 'student' %}
+        {% include 'components/student_sidebar.html' %}
+    {% else %}
+        {% include 'components/parent_sidebar.html' %}
+    {% endif %}
+
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>My Profile</h1>
+                <div class="subtitle">View and manage your account</div>
+            </div>
+        </div>
+
+        <div class="card mb-20">
+            <div class="card-header">
+                <div class="card-title"><span class="dot" style="background:#6366f1;"></span> Account Information</div>
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" value="{{ user.username }}" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" value="{{ user.get_full_name|default:'Not set' }}" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="text" value="{{ user.email|default:'Not set' }}" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" value="{{ user.phone|default:'Not set' }}" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <input type="text" value="{{ user.get_role_display }}" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Joined</label>
+                    <input type="text" value="{{ user.date_joined|date:'d M Y' }}" readonly>
+                </div>
+            </div>
+            {% if user.institution %}
+            <div class="form-group" style="margin-top:8px;">
+                <label>Institution</label>
+                <input type="text" value="{{ user.institution.name }}" readonly>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if profile_data %}
+        <div class="card mb-20">
+            <div class="card-header">
+                <div class="card-title"><span class="dot" style="background:#22c55e;"></span> Profile Details</div>
+            </div>
+            <div class="grid-2">
+                {% if profile_data.name %}
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" value="{{ profile_data.name }}" readonly>
+                </div>
+                {% endif %}
+                {% if profile_data.phone %}
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" value="{{ profile_data.phone }}" readonly>
+                </div>
+                {% endif %}
+                {% if profile_data.department %}
+                <div class="form-group">
+                    <label>Department</label>
+                    <input type="text" value="{{ profile_data.department }}" readonly>
+                </div>
+                {% endif %}
+                {% if profile_data.qualification %}
+                <div class="form-group">
+                    <label>Qualification</label>
+                    <input type="text" value="{{ profile_data.qualification }}" readonly>
+                </div>
+                {% endif %}
+                {% if profile_data.sex %}
+                <div class="form-group">
+                    <label>Gender</label>
+                    <input type="text" value="{{ profile_data.sex }}" readonly>
+                </div>
+                {% endif %}
+                {% if profile_data.age %}
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="text" value="{{ profile_data.age }}" readonly>
+                </div>
+                {% endif %}
+                {% if profile_data.relationship %}
+                <div class="form-group">
+                    <label>Relationship</label>
+                    <input type="text" value="{{ profile_data.relationship }}" readonly>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card" style="border:1px solid rgba(239,68,68,0.2);">
+            <div class="card-header">
+                <div class="card-title" style="color:#f87171;"><span class="dot" style="background:#ef4444;"></span> Danger Zone</div>
+            </div>
+            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">
+                Permanently delete your account and all associated data. This action cannot be undone.
+            </p>
+            <button type="button" class="btn btn-danger" onclick="document.getElementById('delete-modal').style.display='flex'">
+                <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Delete Account
+            </button>
+        </div>
+    </main>
+</div>
+
+<div id="delete-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+    <div style="background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--r-lg);padding:32px;max-width:440px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+            <div style="width:40px;height:40px;border-radius:12px;background:rgba(239,68,68,0.15);display:flex;align-items:center;justify-content:center;color:#f87171;">
+                <i data-lucide="alert-triangle" style="width:22px;height:22px;"></i>
+            </div>
+            <h3 style="font-size:18px;font-weight:700;color:var(--text-primary);">Delete Account</h3>
+        </div>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;">
+            This will permanently delete your account <strong style="color:var(--text-primary);">{{ user.username }}</strong> and all associated data. Type your username to confirm.
+        </p>
+        <form method="POST" action="{% url 'accounts:profile' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Type your username to confirm</label>
+                <input type="text" name="confirm_username" placeholder="{{ user.username }}" required
+                       style="border-color:rgba(239,68,68,0.3);">
+            </div>
+            <div style="display:flex;gap:10px;margin-top:20px;">
+                <button type="button" class="btn btn-secondary" style="flex:1;" onclick="document.getElementById('delete-modal').style.display='none'">Cancel</button>
+                <button type="submit" class="btn btn-danger" style="flex:1;">Delete Forever</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
