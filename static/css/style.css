@@ -616,6 +616,7 @@ table tr:hover td { background: var(--table-hover); }
     box-shadow: var(--toast-shadow);
     animation: slideIn 0.3s ease;
     max-width: 400px;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .toast-success { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #22c55e; }
@@ -800,16 +801,241 @@ table tr:hover td { background: var(--table-hover); }
     box-shadow: 0 4px 30px rgba(99,102,241,0.15);
 }
 
+/* ── Hamburger Menu (Mobile) ──────────────────────────── */
+.hamburger {
+    display: none;
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 101;
+    width: 42px;
+    height: 42px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border-default);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--card-shadow);
+    transition: all var(--duration) var(--ease);
+    backdrop-filter: blur(12px);
+}
+
+.hamburger:hover {
+    border-color: var(--brand-400);
+    color: var(--brand-400);
+}
+
+.sidebar-close {
+    display: none;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border-default);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.sidebar-close:hover {
+    color: var(--red);
+    border-color: rgba(239,68,68,0.3);
+}
+
+/* ── Form Helpers ──────────────────────────────────────── */
+.form-divider {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--brand-text);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 20px 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.form-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+/* ── Card Helpers ──────────────────────────────────────── */
+.card-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-form {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.search-form input {
+    padding: 8px 14px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    width: 240px;
+    transition: border-color var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
+}
+
+.search-form input:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--brand-glow);
+}
+
+/* ── Overview Center (Dashboard Cards) ─────────────────── */
+.overview-center {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.overview-big {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.overview-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.overview-badges {
+    margin-top: 16px;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+/* ── Fee List (Dashboard) ──────────────────────────────── */
+.fee-list {
+    padding: 16px 0;
+}
+
+.fee-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.fee-row:last-child { border-bottom: none; }
+
+.fee-amount {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* ── Table Helpers ─────────────────────────────────────── */
+.td-name { font-weight: 600; color: var(--text-primary); }
+.td-amount { font-weight: 700; color: var(--text-primary); }
+
+/* ── Quick Actions Section ─────────────────────────────── */
+.quick-actions-section { margin-top: 4px; }
+
+.section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+}
+
+/* ── Quick Action Card (Standalone stat-card) ──────────── */
+.quick-action-card {
+    text-align: center;
+    flex-direction: column;
+    padding: 24px 16px;
+}
+
+.quick-action-card:hover {
+    cursor: pointer;
+}
+
+/* ── Chart Helpers ─────────────────────────────────────── */
+.chart-container {
+    position: relative;
+    height: 220px;
+    padding: 0 16px;
+}
+
+.chart-badge-row {
+    text-align: center;
+    padding: 12px 0 4px;
+}
+
+/* ── Summary Grid ──────────────────────────────────────── */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 8px 0;
+}
+
+.summary-item { text-align: center; }
+
+.summary-value {
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.summary-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+}
+
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 1200px) {
     .stat-grid { grid-template-columns: repeat(2, 1fr); }
     .quick-actions { grid-template-columns: repeat(2, 1fr); }
+    .summary-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
 @media (max-width: 768px) {
-    .sidebar { display: none; }
-    .main-content { margin-left: 0; padding: 16px; }
+    .sidebar {
+        position: fixed;
+        transform: translateX(-100%);
+        transition: transform 0.3s var(--ease);
+        z-index: 200;
+        width: 260px;
+        box-shadow: none;
+    }
+    .sidebar.sidebar-open {
+        transform: translateX(0);
+        box-shadow: 4px 0 24px rgba(0,0,0,0.3);
+    }
+    .sidebar-close { display: flex; }
+    .hamburger { display: flex; }
+    .main-content { margin-left: 0; padding: 16px; padding-top: 64px; }
+    .page-header { margin-top: 0; }
     .stat-grid { grid-template-columns: 1fr; }
     .grid-2 { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
     .quick-actions { grid-template-columns: 1fr; }
+    .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    .card-actions { flex-direction: column; align-items: stretch; }
+    .search-form { flex-direction: column; }
+    .search-form input { width: 100%; }
+    .chart-container { height: 180px; }
 }

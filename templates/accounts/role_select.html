@@ -5,17 +5,12 @@
 {% block body %}
 <nav class="auth-nav">
     <a href="/" class="auth-nav-brand">
-        <svg width="28" height="28" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="40" height="40" rx="12" fill="url(#an1)"/>
-            <defs><linearGradient id="an1" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
-            <path d="M10 28 C10 28, 14 14, 20 12 C26 14, 30 28, 30 28" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.9"/>
-            <circle cx="20" cy="19" r="2" fill="white" opacity="0.95"/>
-        </svg>
+        {% include 'components/logo.html' with size=28 %}
         <span>SMS Pro</span>
     </a>
 </nav>
 
-<div class="auth-page" style="display:flex;align-items:center;justify-content:center;">
+<div class="auth-page role-select-page">
     <div class="auth-form-panel" style="width:100%;max-width:520px;padding:48px 40px;">
         <div class="auth-card">
             <div class="auth-card-header" style="text-align:center;">
@@ -37,7 +32,7 @@
                     <label class="role-card">
                         <input type="radio" name="role" value="admin" required>
                         <div class="role-card-inner">
-                            <div class="role-icon">&#128736;</div>
+                            <div class="role-icon"><i data-lucide="settings" style="width:28px;height:28px;"></i></div>
                             <strong>Administrator</strong>
                             <span>Full system control</span>
                         </div>
@@ -45,7 +40,7 @@
                     <label class="role-card">
                         <input type="radio" name="role" value="faculty">
                         <div class="role-card-inner">
-                            <div class="role-icon">&#128218;</div>
+                            <div class="role-icon"><i data-lucide="book-open" style="width:28px;height:28px;"></i></div>
                             <strong>Faculty</strong>
                             <span>Teach & manage students</span>
                         </div>
@@ -53,7 +48,7 @@
                     <label class="role-card">
                         <input type="radio" name="role" value="student">
                         <div class="role-card-inner">
-                            <div class="role-icon">&#127891;</div>
+                            <div class="role-icon"><i data-lucide="graduation-cap" style="width:28px;height:28px;"></i></div>
                             <strong>Student</strong>
                             <span>Access courses & results</span>
                         </div>
@@ -61,19 +56,20 @@
                     <label class="role-card">
                         <input type="radio" name="role" value="parent">
                         <div class="role-card-inner">
-                            <div class="role-icon">&#128106;</div>
+                            <div class="role-icon"><i data-lucide="heart" style="width:28px;height:28px;"></i></div>
                             <strong>Parent</strong>
                             <span>Monitor your child's progress</span>
                         </div>
                     </label>
                 </div>
-                <button type="submit" class="auth-submit" style="margin-top:24px;">Continue &#8594;</button>
+                <button type="submit" class="auth-submit" style="margin-top:24px;">Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i></button>
             </form>
         </div>
     </div>
 </div>
 
 <style>
+.role-select-page { display:flex; align-items:center; justify-content:center; }
 .role-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -96,16 +92,22 @@
     text-align: center;
 }
 .role-card input:checked + .role-card-inner {
-    border-color: var(--accent);
-    background: var(--accent-ghost);
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+    border-color: var(--brand-500);
+    background: var(--brand-bg);
+    box-shadow: 0 0 0 3px var(--brand-glow);
 }
 .role-card-inner:hover {
-    border-color: var(--accent);
+    border-color: var(--brand-400);
     transform: translateY(-2px);
 }
-.role-icon { font-size: 32px; }
+.role-icon {
+    width: 48px; height: 48px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 12px;
+    background: var(--brand-bg);
+    color: var(--brand-text);
+}
 .role-card-inner strong { font-size: 14px; color: var(--text-primary); }
-.role-card-inner span { font-size: 12px; color: var(--text-muted); }
+.role-card-inner span { font-size: 12px; color: var(--text-tertiary); }
 </style>
 {% endblock %}

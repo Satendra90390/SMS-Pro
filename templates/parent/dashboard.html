@@ -2,34 +2,10 @@
 {% block title %}Parent Dashboard - SMS{% endblock %}
 {% block body %}
 <div class="layout">
-    <nav class="sidebar">
-        <div class="sidebar-logo">
-            <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
-                <rect width="40" height="40" rx="12" fill="url(#sbg)"/>
-                <defs><linearGradient id="sbg" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
-                <path d="M10 28 C10 28, 14 14, 20 12 C26 14, 30 28, 30 28" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.9"/>
-                <path d="M10 28 C12 24, 15 20, 20 19" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.4"/>
-                <path d="M30 28 C28 24, 25 20, 20 19" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.4"/>
-                <circle cx="20" cy="19" r="2" fill="white" opacity="0.95"/>
-            </svg>
-            <span>SMS Pro</span>
-        </div>
-        <div class="sidebar-profile">
-            <div class="avatar">{{ user.username.0|upper }}</div>
-            <div class="user-info">
-                <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
-                <div class="role-badge">Parent</div>
-            </div>
-        </div>
-        <div class="sidebar-nav">
-            <a href="{% url 'core:parent_dashboard' %}" class="active"><span class="icon">&#128202;</span> Dashboard</a>
-        </div>
-        <div class="sidebar-footer">
-            <a href="{% url 'accounts:logout' %}" class="btn btn-danger btn-block btn-sm">&#128682; Logout</a>
-        </div>
-    </nav>
+    {% include 'components/parent_sidebar.html' %}
 
     <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
         <div class="page-header">
             <div class="header-avatar">{{ user.username.0|upper }}</div>
             <div>
@@ -40,24 +16,24 @@
 
         <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
             <div class="stat-card">
-                <div class="stat-icon" style="background:rgba(139,92,246,0.1);color:#a78bfa;">&#128104;&#8205;&#128105;&#8205;&#127891;</div>
+                <div class="stat-icon"><i data-lucide="baby" style="width:22px;height:22px;"></i></div>
                 <div>
-                    <div class="stat-value">{% if parent_obj %}{{ parent_obj.child_name|default:"-" }}{% else %}-{% endif %}</div>
+                    <div class="stat-value">{% if parent_obj %}{{ parent_obj.child.name|default:"-" }}{% else %}-{% endif %}</div>
                     <div class="stat-label">Child's Name</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon" style="background:rgba(16,185,129,0.1);color:#34d399;">&#128202;</div>
+                <div class="stat-icon"><i data-lucide="school" style="width:22px;height:22px;"></i></div>
                 <div>
-                    <div class="stat-value">{% if parent_obj %}{{ parent_obj.child_class|default:"-" }}{% else %}-{% endif %}</div>
-                    <div class="stat-label">Child's Class</div>
+                    <div class="stat-value">{% if parent_obj %}{{ parent_obj.relationship|default:"-" }}{% else %}-{% endif %}</div>
+                    <div class="stat-label">Relationship</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon" style="background:rgba(14,165,233,0.1);color:#38bdf8;">&#128197;</div>
+                <div class="stat-icon"><i data-lucide="phone" style="width:22px;height:22px;"></i></div>
                 <div>
-                    <div class="stat-value">{% if parent_obj %}{{ parent_obj.child_roll|default:"-" }}{% else %}-{% endif %}</div>
-                    <div class="stat-label">Roll Number</div>
+                    <div class="stat-value">{% if parent_obj %}{{ parent_obj.phone|default:"-" }}{% else %}-{% endif %}</div>
+                    <div class="stat-label">Contact Phone</div>
                 </div>
             </div>
         </div>
@@ -67,25 +43,21 @@
                 <div class="card-header">
                     <div class="card-title"><span class="dot" style="background:#a78bfa;"></span> Child's Grades</div>
                 </div>
-                <div style="text-align:center;padding:20px 0;">
-                    {% if parent_obj %}
-                    <div class="empty-state"><div class="icon">&#128202;</div><h3>Grades will appear here</h3></div>
-                    {% else %}
-                    <div class="empty-state"><div class="icon">&#128100;</div><h3>No child data linked yet</h3></div>
-                    {% endif %}
-                </div>
+                {% if parent_obj %}
+                <div class="empty-state"><div class="icon"><i data-lucide="bar-chart-3" style="width:48px;height:48px;"></i></div><h3>Grades will appear here</h3></div>
+                {% else %}
+                <div class="empty-state"><div class="icon"><i data-lucide="user-x" style="width:48px;height:48px;"></i></div><h3>No child data linked yet</h3></div>
+                {% endif %}
             </div>
             <div class="card">
                 <div class="card-header">
                     <div class="card-title"><span class="dot" style="background:#34d399;"></span> Child's Attendance</div>
                 </div>
-                <div style="text-align:center;padding:20px 0;">
-                    {% if parent_obj %}
-                    <div class="empty-state"><div class="icon">&#128197;</div><h3>Attendance will appear here</h3></div>
-                    {% else %}
-                    <div class="empty-state"><div class="icon">&#128100;</div><h3>No child data linked yet</h3></div>
-                    {% endif %}
-                </div>
+                {% if parent_obj %}
+                <div class="empty-state"><div class="icon"><i data-lucide="calendar-check" style="width:48px;height:48px;"></i></div><h3>Attendance will appear here</h3></div>
+                {% else %}
+                <div class="empty-state"><div class="icon"><i data-lucide="user-x" style="width:48px;height:48px;"></i></div><h3>No child data linked yet</h3></div>
+                {% endif %}
             </div>
         </div>
 
@@ -94,17 +66,23 @@
                 <div class="card-title"><span class="dot" style="background:#fbbf24;"></span> Quick Actions</div>
             </div>
             <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:0;">
-                <div class="stat-card" style="text-align:center;flex-direction:column;padding:24px 16px;">
-                    <div style="font-size:28px;margin-bottom:10px;">&#128202;</div>
-                    <div style="font-size:13px;color:#94a3b8;font-weight:500;">Child's Grades</div>
+                <div class="stat-card quick-action-card">
+                    <div class="stat-icon"><i data-lucide="bar-chart-3" style="width:22px;height:22px;"></i></div>
+                    <div>
+                        <div class="stat-label">Child's Grades</div>
+                    </div>
                 </div>
-                <div class="stat-card" style="text-align:center;flex-direction:column;padding:24px 16px;">
-                    <div style="font-size:28px;margin-bottom:10px;">&#128197;</div>
-                    <div style="font-size:13px;color:#94a3b8;font-weight:500;">Child's Attendance</div>
+                <div class="stat-card quick-action-card">
+                    <div class="stat-icon"><i data-lucide="calendar-check" style="width:22px;height:22px;"></i></div>
+                    <div>
+                        <div class="stat-label">Child's Attendance</div>
+                    </div>
                 </div>
-                <div class="stat-card" style="text-align:center;flex-direction:column;padding:24px 16px;">
-                    <div style="font-size:28px;margin-bottom:10px;">&#128176;</div>
-                    <div style="font-size:13px;color:#94a3b8;font-weight:500;">Child's Fees</div>
+                <div class="stat-card quick-action-card">
+                    <div class="stat-icon"><i data-lucide="indian-rupee" style="width:22px;height:22px;"></i></div>
+                    <div>
+                        <div class="stat-label">Child's Fees</div>
+                    </div>
                 </div>
             </div>
         </div>

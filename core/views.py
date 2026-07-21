@@ -55,6 +55,20 @@ def admin_students(request):
         return redirect('core:dashboard')
     inst = request.user.institution
     students = Student.objects.filter(institution=inst).order_by('name')
+    q = request.GET.get('q', '').strip()
+    if q:
+        students = students.filter(Q(name__icontains=q) | Q(phone__icontains=q))
+    if request.method == 'POST' and request.POST.get('delete_id'):
+        sid = request.POST.get('delete_id')
+        try:
+            s = Student.objects.get(pk=sid, institution=inst)
+            name = s.name
+            s.delete()
+            log_audit(request.user, 'delete_student', f"Deleted student {name}", 'student_details')
+            messages.success(request, f'Student "{name}" deleted.')
+        except Student.DoesNotExist:
+            messages.error(request, 'Student not found.')
+        return redirect('core:admin_students')
     return render(request, 'admin_panel/students.html', {'students': students})
 
 
@@ -178,16 +192,17 @@ def admin_analytics(request):
     if request.user.role != 'admin':
         return redirect('core:dashboard')
     inst = request.user.institution
+    total = Attendance.objects.filter(institution=inst).count()
+    present = Attendance.objects.filter(institution=inst, status='Present').count() if total else 0
+    absent = Attendance.objects.filter(institution=inst, status='Absent').count() if total else 0
     ctx = {
         'student_count': Student.objects.filter(institution=inst).count(),
         'faculty_count': Faculty.objects.filter(institution=inst).count(),
         'course_count': Course.objects.filter(institution=inst).count(),
-        'attendance_rate': 0,
+        'attendance_rate': round(present / total * 100, 1) if total else 0,
+        'present_count': present,
+        'absent_count': absent,
     }
-    total = Attendance.objects.filter(institution=inst).count()
-    if total:
-        present = Attendance.objects.filter(institution=inst, status='Present').count()
-        ctx['attendance_rate'] = round(present / total * 100, 1)
     return render(request, 'admin_panel/analytics.html', ctx)
 
 

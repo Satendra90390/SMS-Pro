@@ -2,42 +2,10 @@
 {% block title %}Add Student - SMS{% endblock %}
 {% block body %}
 <div class="layout">
-    <nav class="sidebar">
-        <div class="sidebar-logo">
-            <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
-                <rect width="40" height="40" rx="12" fill="url(#sbg)"/>
-                <defs><linearGradient id="sbg" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
-                <path d="M10 28 C10 28, 14 14, 20 12 C26 14, 30 28, 30 28" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.9"/>
-                <path d="M10 28 C12 24, 15 20, 20 19" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.4"/>
-                <path d="M30 28 C28 24, 25 20, 20 19" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.4"/>
-                <circle cx="20" cy="19" r="2" fill="white" opacity="0.95"/>
-            </svg>
-            <span>SMS Pro</span>
-        </div>
-        <div class="sidebar-profile">
-            <div class="avatar">{{ user.username.0|upper }}</div>
-            <div class="user-info">
-                <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
-                <div class="role-badge">Administrator</div>
-            </div>
-        </div>
-        <div class="sidebar-nav">
-            <a href="{% url 'core:admin_dashboard' %}"><span class="icon">&#128202;</span> Dashboard</a>
-            <a href="{% url 'core:admin_students' %}"><span class="icon">&#127891;</span> Manage Students</a>
-            <a href="{% url 'core:admin_add_student' %}" class="active"><span class="icon">&#10133;</span> Add Student</a>
-            <a href="{% url 'core:admin_faculty' %}"><span class="icon">&#128105;&#8205;&#127979;</span> Manage Faculty</a>
-            <a href="{% url 'core:admin_add_faculty' %}"><span class="icon">&#10133;</span> Add Faculty</a>
-            <a href="{% url 'core:admin_subjects' %}"><span class="icon">&#128218;</span> Manage Subjects</a>
-            <a href="{% url 'core:admin_reports' %}"><span class="icon">&#128203;</span> Reports</a>
-            <a href="{% url 'core:admin_fees' %}"><span class="icon">&#128176;</span> Fees Management</a>
-            <a href="{% url 'core:admin_analytics' %}"><span class="icon">&#128200;</span> System Analytics</a>
-        </div>
-        <div class="sidebar-footer">
-            <a href="{% url 'accounts:logout' %}" class="btn btn-danger btn-block btn-sm">&#128682; Logout</a>
-        </div>
-    </nav>
+    {% include 'components/admin_sidebar.html' with active='add_student' %}
 
     <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
         <div class="page-header">
             <div class="header-avatar">{{ user.username.0|upper }}</div>
             <div>
@@ -76,7 +44,7 @@
                         <input type="text" name="phone" placeholder="+91 98765 43210" required>
                     </div>
                 </div>
-                <div style="font-size:11px;font-weight:700;color:#818cf8;text-transform:uppercase;letter-spacing:1.5px;margin:20px 0 10px;padding-bottom:8px;border-bottom:1px solid rgba(99,102,241,0.1);">Login Credentials</div>
+                <div class="form-divider">Login Credentials</div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Username</label>
@@ -87,9 +55,9 @@
                         <input type="password" name="password" placeholder="Min 6 characters" required>
                     </div>
                 </div>
-                <div style="margin-top:20px;display:flex;gap:10px;">
-                    <button type="submit" class="btn btn-primary">&#10003; Add Student</button>
-                    <a href="{% url 'core:admin_students' %}" class="btn btn-secondary">&#8592; Cancel</a>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary"><i data-lucide="check" style="width:16px;height:16px;"></i> Add Student</button>
+                    <a href="{% url 'core:admin_students' %}" class="btn btn-secondary"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i> Cancel</a>
                 </div>
             </form>
         </div>

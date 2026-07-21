@@ -1,17 +1,12 @@
 {% extends 'base.html' %}
 {% load static socialaccount %}
 {% block title %}Register Institution — SMS Pro{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'css/auth.css' %}?v=2">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/auth.css' %}?v=3">{% endblock %}
 {% block body %}
 <!-- Top Nav Bar -->
 <nav class="auth-nav">
     <a href="/" class="auth-nav-brand">
-        <svg width="28" height="28" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="40" height="40" rx="12" fill="url(#an2)"/>
-            <defs><linearGradient id="an2" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
-            <path d="M10 28 C10 28, 14 14, 20 12 C26 14, 30 28, 30 28" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.9"/>
-            <circle cx="20" cy="19" r="2" fill="white" opacity="0.95"/>
-        </svg>
+        {% include 'components/logo.html' with size=28 %}
         <span>SMS Pro</span>
     </a>
     <div class="auth-nav-links">
@@ -40,21 +35,21 @@
             <p>Create your institution account and begin managing students, faculty, and academics in minutes.</p>
             <div class="brand-features">
                 <div class="brand-feature">
-                    <div class="brand-feature-icon">&#9989;</div>
+                    <div class="brand-feature-icon"><i data-lucide="check-circle" style="width:22px;height:22px;"></i></div>
                     <div class="brand-feature-text">
                         <strong>Free to Start</strong>
                         <span>No credit card required for setup</span>
                     </div>
                 </div>
                 <div class="brand-feature">
-                    <div class="brand-feature-icon">&#9889;</div>
+                    <div class="brand-feature-icon"><i data-lucide="zap" style="width:22px;height:22px;"></i></div>
                     <div class="brand-feature-text">
                         <strong>Quick Setup</strong>
                         <span>Get running in under 5 minutes</span>
                     </div>
                 </div>
                 <div class="brand-feature">
-                    <div class="brand-feature-icon">&#128640;</div>
+                    <div class="brand-feature-icon"><i data-lucide="rocket" style="width:22px;height:22px;"></i></div>
                     <div class="brand-feature-text">
                         <strong>Full Platform Access</strong>
                         <span>All features included from day one</span>
@@ -101,7 +96,7 @@
                 <div id="step1">
                     <div class="form-section">
                         <div class="form-section-title">
-                            <div class="section-icon">&#127963;</div>
+                            <div class="section-icon"><i data-lucide="building-2" style="width:22px;height:22px;"></i></div>
                             Institution Details
                         </div>
                     </div>
@@ -110,7 +105,7 @@
                         <label>Institution Name <span class="required">*</span></label>
                         <div class="input-wrap">
                             <input type="text" name="inst_name" placeholder="e.g. Delhi Public School" required>
-                            <span class="input-icon">&#127963;</span>
+                            <span class="input-icon"><i data-lucide="building-2" style="width:18px;height:18px;"></i></span>
                         </div>
                     </div>
 
@@ -131,7 +126,7 @@
                         <label>Phone <span class="required">*</span></label>
                         <div class="input-wrap">
                             <input type="text" name="inst_phone" placeholder="+91 98765 43210" required>
-                            <span class="input-icon">&#128222;</span>
+                            <span class="input-icon"><i data-lucide="phone" style="width:18px;height:18px;"></i></span>
                         </div>
                     </div>
 
@@ -139,7 +134,7 @@
                         <label>Email</label>
                         <div class="input-wrap">
                             <input type="email" name="inst_email" placeholder="info@school.edu">
-                            <span class="input-icon">&#9993;</span>
+                            <span class="input-icon"><i data-lucide="mail" style="width:18px;height:18px;"></i></span>
                         </div>
                     </div>
 
@@ -147,12 +142,12 @@
                         <label>Address</label>
                         <div class="input-wrap">
                             <input type="text" name="inst_address" placeholder="City, State, Country">
-                            <span class="input-icon">&#128205;</span>
+                            <span class="input-icon"><i data-lucide="map-pin" style="width:18px;height:18px;"></i></span>
                         </div>
                     </div>
 
                     <button type="button" class="auth-submit" onclick="goToStep2()">
-                        Continue &#8594;
+                        Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
                     </button>
                 </div>
 
@@ -160,7 +155,7 @@
                 <div id="step2" style="display:none;">
                     <div class="form-section">
                         <div class="form-section-title">
-                            <div class="section-icon">&#128100;</div>
+                            <div class="section-icon"><i data-lucide="user-circle" style="width:22px;height:22px;"></i></div>
                             Admin Account
                         </div>
                     </div>
@@ -169,7 +164,7 @@
                         <label>Full Name <span class="required">*</span></label>
                         <div class="input-wrap">
                             <input type="text" name="admin_name" placeholder="e.g. Rajesh Kumar" required>
-                            <span class="input-icon">&#128100;</span>
+                            <span class="input-icon"><i data-lucide="user" style="width:18px;height:18px;"></i></span>
                         </div>
                     </div>
 
@@ -177,7 +172,7 @@
                         <label>Username <span class="required">*</span></label>
                         <div class="input-wrap">
                             <input type="text" name="admin_username" placeholder="Choose a username" required>
-                            <span class="input-icon">&#64;</span>
+                            <span class="input-icon"><i data-lucide="at-sign" style="width:18px;height:18px;"></i></span>
                         </div>
                     </div>
 
@@ -185,7 +180,7 @@
                         <label>Password <span class="required">*</span></label>
                         <div class="input-wrap">
                             <input type="password" name="admin_password" id="reg-password" placeholder="Min 6 characters" required oninput="checkStrength(this.value)">
-                            <button type="button" class="password-toggle" onclick="togglePassword('reg-password', this)">&#128065;</button>
+                            <button type="button" class="password-toggle" onclick="togglePassword('reg-password', this)"><i data-lucide="eye-off" style="width:18px;height:18px;"></i></button>
                         </div>
                         <div class="password-strength" id="strength-bars">
                             <div class="strength-bar" id="bar1"></div>
@@ -200,16 +195,16 @@
                         <label>Confirm Password <span class="required">*</span></label>
                         <div class="input-wrap">
                             <input type="password" name="admin_confirm" id="reg-confirm" placeholder="Re-enter password" required>
-                            <button type="button" class="password-toggle" onclick="togglePassword('reg-confirm', this)">&#128065;</button>
+                            <button type="button" class="password-toggle" onclick="togglePassword('reg-confirm', this)"><i data-lucide="eye-off" style="width:18px;height:18px;"></i></button>
                         </div>
                     </div>
 
                     <div style="display:flex;gap:10px;margin-top:8px;">
                         <button type="button" class="btn btn-secondary" style="flex:0 0 auto;padding:14px 20px;" onclick="goToStep1()">
-                            &#8592;
+                            <i data-lucide="arrow-left" style="width:18px;height:18px;"></i>
                         </button>
                         <button type="submit" class="auth-submit" style="flex:1;">
-                            Create Institution &#10003;
+                            Create Institution <i data-lucide="check" style="width:18px;height:18px;"></i>
                         </button>
                     </div>
                 </div>
@@ -221,12 +216,13 @@
 <script>
 function togglePassword(inputId, btn) {
     var input = document.getElementById(inputId);
+    var icon = btn.querySelector('i');
     if (input.type === 'password') {
         input.type = 'text';
-        btn.innerHTML = '&#128064;';
+        if (icon) { icon.setAttribute('data-lucide', 'eye'); lucide.createIcons({ nodes: [icon] }); }
     } else {
         input.type = 'password';
-        btn.innerHTML = '&#128065;';
+        if (icon) { icon.setAttribute('data-lucide', 'eye-off'); lucide.createIcons({ nodes: [icon] }); }
     }
 }
 
@@ -236,6 +232,7 @@ function goToStep2() {
     document.getElementById('step1-ind').classList.remove('active');
     document.getElementById('step1-ind').classList.add('completed');
     document.getElementById('step2-ind').classList.add('active');
+    lucide.createIcons();
 }
 
 function goToStep1() {

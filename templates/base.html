@@ -7,9 +7,10 @@
     <title>{% block title %}SMS Pro{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=2">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
-    <link rel="stylesheet" href="{% static 'css/chat.css' %}?v=2">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'css/chat.css' %}?v=3">
     {% block extra_css %}{% endblock %}
     <script>
         (function() {
@@ -201,6 +202,18 @@
             }
         }
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+        document.querySelectorAll('.toast').forEach(function(t) {
+            setTimeout(function() { t.style.opacity = '0'; t.style.transform = 'translateX(100%)'; setTimeout(function() { t.remove(); }, 300); }, 4000);
+        });
+    });
+
+    function toggleSidebar() {
+        var sb = document.querySelector('.sidebar');
+        if (sb) { sb.classList.toggle('sidebar-open'); }
+    }
     </script>
 </body>
 </html>

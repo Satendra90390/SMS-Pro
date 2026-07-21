@@ -2,42 +2,10 @@
 {% block title %}Admin Dashboard - SMS{% endblock %}
 {% block body %}
 <div class="layout">
-    <nav class="sidebar">
-        <div class="sidebar-logo">
-            <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
-                <rect width="40" height="40" rx="12" fill="url(#sbg)"/>
-                <defs><linearGradient id="sbg" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
-                <path d="M10 28 C10 28, 14 14, 20 12 C26 14, 30 28, 30 28" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.9"/>
-                <path d="M10 28 C12 24, 15 20, 20 19" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.4"/>
-                <path d="M30 28 C28 24, 25 20, 20 19" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.4"/>
-                <circle cx="20" cy="19" r="2" fill="white" opacity="0.95"/>
-            </svg>
-            <span>SMS Pro</span>
-        </div>
-        <div class="sidebar-profile">
-            <div class="avatar">{{ user.username.0|upper }}</div>
-            <div class="user-info">
-                <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
-                <div class="role-badge">Administrator</div>
-            </div>
-        </div>
-        <div class="sidebar-nav">
-            <a href="{% url 'core:admin_dashboard' %}" class="active"><span class="icon">&#128202;</span> Dashboard</a>
-            <a href="{% url 'core:admin_students' %}"><span class="icon">&#127891;</span> Manage Students</a>
-            <a href="{% url 'core:admin_add_student' %}"><span class="icon">&#10133;</span> Add Student</a>
-            <a href="{% url 'core:admin_faculty' %}"><span class="icon">&#128105;&#8205;&#127979;</span> Manage Faculty</a>
-            <a href="{% url 'core:admin_add_faculty' %}"><span class="icon">&#10133;</span> Add Faculty</a>
-            <a href="{% url 'core:admin_subjects' %}"><span class="icon">&#128218;</span> Manage Subjects</a>
-            <a href="{% url 'core:admin_reports' %}"><span class="icon">&#128203;</span> Reports</a>
-            <a href="{% url 'core:admin_fees' %}"><span class="icon">&#128176;</span> Fees Management</a>
-            <a href="{% url 'core:admin_analytics' %}"><span class="icon">&#128200;</span> System Analytics</a>
-        </div>
-        <div class="sidebar-footer">
-            <a href="{% url 'accounts:logout' %}" class="btn btn-danger btn-block btn-sm">&#128682; Logout</a>
-        </div>
-    </nav>
+    {% include 'components/admin_sidebar.html' with active='dashboard' %}
 
     <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
         <div class="page-header">
             <div class="header-avatar">{{ user.username.0|upper }}</div>
             <div>
@@ -48,28 +16,28 @@
 
         <div class="stat-grid">
             <div class="stat-card">
-                <div class="stat-icon" style="background:rgba(139,92,246,0.1);color:#a78bfa;">&#127891;</div>
+                <div class="stat-icon"><i data-lucide="graduation-cap" style="width:22px;height:22px;"></i></div>
                 <div>
                     <div class="stat-value">{{ student_count }}</div>
                     <div class="stat-label">Total Students</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon" style="background:rgba(16,185,129,0.1);color:#34d399;">&#128105;&#8205;&#127979;</div>
+                <div class="stat-icon"><i data-lucide="users" style="width:22px;height:22px;"></i></div>
                 <div>
                     <div class="stat-value">{{ faculty_count }}</div>
                     <div class="stat-label">Total Faculty</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon" style="background:rgba(14,165,233,0.1);color:#38bdf8;">&#128197;</div>
+                <div class="stat-icon"><i data-lucide="calendar-check" style="width:22px;height:22px;"></i></div>
                 <div>
                     <div class="stat-value">{{ total_attendance }}</div>
                     <div class="stat-label">Attendance Records</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon" style="background:rgba(245,158,11,0.1);color:#fbbf24;">&#128176;</div>
+                <div class="stat-icon"><i data-lucide="indian-rupee" style="width:22px;height:22px;"></i></div>
                 <div>
                     <div class="stat-value">&#8377;{{ fees_collected|floatformat:0 }}</div>
                     <div class="stat-label">Fees Collected</div>
@@ -82,54 +50,54 @@
                 <div class="card-header">
                     <div class="card-title"><span class="dot" style="background:#22c55e;"></span> Attendance Overview</div>
                 </div>
-                <div style="text-align:center;padding:20px 0;">
-                    {% if total_attendance %}
-                    <div style="font-size:40px;font-weight:800;color:#f1f5f9;">{{ present_count }}/{{ total_attendance }}</div>
-                    <div style="font-size:13px;color:#64748b;margin-top:4px;">Present / Total</div>
-                    <div style="margin-top:16px;display:flex;gap:16px;justify-content:center;">
-                        <div><span class="badge badge-green">Present {{ present_count }}</span></div>
-                        <div><span class="badge badge-red">Absent {{ absent_count }}</span></div>
+                {% if total_attendance %}
+                <div class="overview-center">
+                    <div class="overview-big">{{ present_count }}/{{ total_attendance }}</div>
+                    <div class="overview-sub">Present / Total</div>
+                    <div class="overview-badges">
+                        <span class="badge badge-green">Present {{ present_count }}</span>
+                        <span class="badge badge-red">Absent {{ absent_count }}</span>
                     </div>
-                    {% else %}
-                    <div class="empty-state"><div class="icon">&#128197;</div><h3>No attendance data yet</h3></div>
-                    {% endif %}
                 </div>
+                {% else %}
+                <div class="empty-state"><div class="icon"><i data-lucide="calendar-x" style="width:48px;height:48px;"></i></div><h3>No attendance data yet</h3></div>
+                {% endif %}
             </div>
             <div class="card">
                 <div class="card-header">
                     <div class="card-title"><span class="dot" style="background:#a78bfa;"></span> Fee Collection Status</div>
                 </div>
-                <div style="padding:16px 0;">
+                <div class="fee-list">
                     {% for item in total_fees %}
-                    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(99,102,241,0.06);">
+                    <div class="fee-row">
                         <span class="badge {% if item.status == 'Paid' %}badge-green{% elif item.status == 'Pending' %}badge-red{% else %}badge-yellow{% endif %}">{{ item.status }}</span>
-                        <span style="font-weight:700;color:#f1f5f9;">&#8377;{{ item.total|floatformat:0 }}</span>
+                        <span class="fee-amount">&#8377;{{ item.total|floatformat:0 }}</span>
                     </div>
                     {% empty %}
-                    <div class="empty-state"><div class="icon">&#128176;</div><h3>No fee data yet</h3></div>
+                    <div class="empty-state"><div class="icon"><i data-lucide="indian-rupee" style="width:48px;height:48px;"></i></div><h3>No fee data yet</h3></div>
                     {% endfor %}
                 </div>
             </div>
         </div>
 
-        <div style="margin-top:4px;">
-            <div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Quick Actions</div>
-            <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);">
-                <a href="{% url 'core:admin_students' %}" class="stat-card" style="text-decoration:none;text-align:center;flex-direction:column;padding:24px 16px;">
-                    <div style="font-size:28px;margin-bottom:10px;">&#127891;</div>
-                    <div style="font-size:13px;color:#94a3b8;font-weight:500;">Students</div>
+        <div class="quick-actions-section">
+            <div class="section-label">Quick Actions</div>
+            <div class="quick-actions">
+                <a href="{% url 'core:admin_students' %}" class="quick-action-btn">
+                    <div class="qa-icon"><i data-lucide="graduation-cap" style="width:20px;height:20px;"></i></div>
+                    Students
                 </a>
-                <a href="{% url 'core:admin_faculty' %}" class="stat-card" style="text-decoration:none;text-align:center;flex-direction:column;padding:24px 16px;">
-                    <div style="font-size:28px;margin-bottom:10px;">&#128105;&#8205;&#127979;</div>
-                    <div style="font-size:13px;color:#94a3b8;font-weight:500;">Faculty</div>
+                <a href="{% url 'core:admin_faculty' %}" class="quick-action-btn">
+                    <div class="qa-icon"><i data-lucide="users" style="width:20px;height:20px;"></i></div>
+                    Faculty
                 </a>
-                <a href="{% url 'core:admin_subjects' %}" class="stat-card" style="text-decoration:none;text-align:center;flex-direction:column;padding:24px 16px;">
-                    <div style="font-size:28px;margin-bottom:10px;">&#128218;</div>
-                    <div style="font-size:13px;color:#94a3b8;font-weight:500;">Subjects</div>
+                <a href="{% url 'core:admin_subjects' %}" class="quick-action-btn">
+                    <div class="qa-icon"><i data-lucide="book-open" style="width:20px;height:20px;"></i></div>
+                    Subjects
                 </a>
-                <a href="{% url 'core:admin_reports' %}" class="stat-card" style="text-decoration:none;text-align:center;flex-direction:column;padding:24px 16px;">
-                    <div style="font-size:28px;margin-bottom:10px;">&#128202;</div>
-                    <div style="font-size:13px;color:#94a3b8;font-weight:500;">Reports</div>
+                <a href="{% url 'core:admin_reports' %}" class="quick-action-btn">
+                    <div class="qa-icon"><i data-lucide="bar-chart-3" style="width:20px;height:20px;"></i></div>
+                    Reports
                 </a>
             </div>
         </div>

@@ -1,0 +1,21 @@
+{% load static %}
+<nav class="sidebar" id="sidebar">
+    <button class="sidebar-close" onclick="toggleSidebar()" aria-label="Close menu"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
+    <div class="sidebar-logo">
+        {% include 'components/logo.html' with size=36 %}
+        <span>SMS Pro</span>
+    </div>
+    <div class="sidebar-profile">
+        <div class="avatar">{{ user.username.0|upper }}</div>
+        <div class="user-info">
+            <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+            <div class="role-badge">Parent</div>
+        </div>
+    </div>
+    <div class="sidebar-nav">
+        <a href="{% url 'core:parent_dashboard' %}" class="active"><span class="icon"><i data-lucide="layout-dashboard" style="width:18px;height:18px;"></i></span> Dashboard</a>
+    </div>
+    <div class="sidebar-footer">
+        <a href="{% url 'accounts:logout' %}" class="btn btn-danger btn-block btn-sm"><i data-lucide="log-out" style="width:14px;height:14px;"></i> Logout</a>
+    </div>
+</nav>

@@ -1,0 +1,29 @@
+{% load static %}
+<nav class="sidebar" id="sidebar">
+    <button class="sidebar-close" onclick="toggleSidebar()" aria-label="Close menu"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
+    <div class="sidebar-logo">
+        {% include 'components/logo.html' with size=36 %}
+        <span>SMS Pro</span>
+    </div>
+    <div class="sidebar-profile">
+        <div class="avatar">{{ user.username.0|upper }}</div>
+        <div class="user-info">
+            <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+            <div class="role-badge">Administrator</div>
+        </div>
+    </div>
+    <div class="sidebar-nav">
+        <a href="{% url 'core:admin_dashboard' %}" {% if active == 'dashboard' %}class="active"{% endif %}><span class="icon"><i data-lucide="layout-dashboard" style="width:18px;height:18px;"></i></span> Dashboard</a>
+        <a href="{% url 'core:admin_students' %}" {% if active == 'students' %}class="active"{% endif %}><span class="icon"><i data-lucide="graduation-cap" style="width:18px;height:18px;"></i></span> Manage Students</a>
+        <a href="{% url 'core:admin_add_student' %}" {% if active == 'add_student' %}class="active"{% endif %}><span class="icon"><i data-lucide="user-plus" style="width:18px;height:18px;"></i></span> Add Student</a>
+        <a href="{% url 'core:admin_faculty' %}" {% if active == 'faculty' %}class="active"{% endif %}><span class="icon"><i data-lucide="users" style="width:18px;height:18px;"></i></span> Manage Faculty</a>
+        <a href="{% url 'core:admin_add_faculty' %}" {% if active == 'add_faculty' %}class="active"{% endif %}><span class="icon"><i data-lucide="user-plus" style="width:18px;height:18px;"></i></span> Add Faculty</a>
+        <a href="{% url 'core:admin_subjects' %}" {% if active == 'subjects' %}class="active"{% endif %}><span class="icon"><i data-lucide="book-open" style="width:18px;height:18px;"></i></span> Manage Subjects</a>
+        <a href="{% url 'core:admin_reports' %}" {% if active == 'reports' %}class="active"{% endif %}><span class="icon"><i data-lucide="file-text" style="width:18px;height:18px;"></i></span> Reports</a>
+        <a href="{% url 'core:admin_fees' %}" {% if active == 'fees' %}class="active"{% endif %}><span class="icon"><i data-lucide="indian-rupee" style="width:18px;height:18px;"></i></span> Fees Management</a>
+        <a href="{% url 'core:admin_analytics' %}" {% if active == 'analytics' %}class="active"{% endif %}><span class="icon"><i data-lucide="bar-chart-3" style="width:18px;height:18px;"></i></span> System Analytics</a>
+    </div>
+    <div class="sidebar-footer">
+        <a href="{% url 'accounts:logout' %}" class="btn btn-danger btn-block btn-sm"><i data-lucide="log-out" style="width:14px;height:14px;"></i> Logout</a>
+    </div>
+</nav>
