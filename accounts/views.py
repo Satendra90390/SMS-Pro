@@ -40,7 +40,7 @@ def role_select(request):
         return redirect('core:dashboard')
     if request.method == 'POST':
         role = request.POST.get('role', '')
-        if role in ['admin', 'faculty', 'student', 'parent']:
+        if role in ['admin', 'accountant', 'faculty', 'student', 'parent']:
             user.role = role
             user.save()
             return redirect('core:dashboard')

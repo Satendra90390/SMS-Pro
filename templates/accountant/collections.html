@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}Collections - Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/accountant_sidebar.html' with active='collections' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Collections</h1>
+                <div class="subtitle">Summary of all collected fees</div>
+            </div>
+        </div>
+
+        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="indian-rupee" style="width:22px;height:22px;"></i></div>
+                <div>
+                    <div class="stat-value">&#8377;{{ total|floatformat:0 }}</div>
+                    <div class="stat-label">Total Collected</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="file-text" style="width:22px;height:22px;"></i></div>
+                <div>
+                    <div class="stat-value">{{ fees.count }}</div>
+                    <div class="stat-label">Paid Records</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="layers" style="width:22px;height:22px;"></i></div>
+                <div>
+                    <div class="stat-value">{{ by_type|length }}</div>
+                    <div class="stat-label">Fee Categories</div>
+                </div>
+            </div>
+        </div>
+
+        {% if by_type %}
+        <div class="card mb-20">
+            <div class="card-header">
+                <div class="card-title"><span class="dot" style="background:#22c55e;"></span> By Fee Type</div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Records</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in by_type %}
+                        <tr>
+                            <td class="td-name">{{ item.fee_type }}</td>
+                            <td>{{ item.count }}</td>
+                            <td class="td-amount">&#8377;{{ item.total|floatformat:0 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><span class="dot" style="background:#22c55e;"></span> All Paid Records</div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Student</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                            <th>Due Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fee in fees %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td class="td-name">{{ fee.student.name }}</td>
+                            <td class="td-amount">&#8377;{{ fee.amount|floatformat:0 }}</td>
+                            <td>{{ fee.fee_type }}</td>
+                            <td>{{ fee.due_date|default:"-" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state"><div class="icon"><i data-lucide="wallet" style="width:48px;height:48px;"></i></div><h3>No collections yet</h3></div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

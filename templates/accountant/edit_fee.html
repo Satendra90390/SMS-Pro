@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Edit Fee - Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/accountant_sidebar.html' with active='fees' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Edit Fee Record</h1>
+                <div class="subtitle">Update fee details for {{ fee.student.name }}</div>
+            </div>
+        </div>
+
+        <div class="card" style="max-width:600px;">
+            <div class="card-header">
+                <div class="card-title"><span class="dot" style="background:#6366f1;"></span> Edit Fee</div>
+            </div>
+
+            <form method="POST" class="auth-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Student</label>
+                    <select name="student" required style="width:100%;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-md);color:var(--text-primary);font-size:14px;font-family:inherit;">
+                        {% for s in students %}
+                        <option value="{{ s.id }}" {% if s.id == fee.student_id %}selected{% endif %}>{{ s.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Amount (&#8377;)</label>
+                        <input type="number" name="amount" step="0.01" min="0" value="{{ fee.amount }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Due Date</label>
+                        <input type="date" name="due_date" value="{{ fee.due_date|date:'Y-m-d' }}" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fee Type</label>
+                        <select name="fee_type" style="width:100%;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-md);color:var(--text-primary);font-size:14px;font-family:inherit;">
+                            {% for t in "Tuition,Exam,Library,Hostel,Transport,Other" %}
+                            <option value="{{ t }}" {% if fee.fee_type == t %}selected{% endif %}>{{ t }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select name="status" style="width:100%;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-md);color:var(--text-primary);font-size:14px;font-family:inherit;">
+                            {% for s in "Paid,Pending,Partial" %}
+                            <option value="{{ s }}" {% if fee.status == s %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="3" style="width:100%;padding:12px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r-md);color:var(--text-primary);font-size:14px;font-family:inherit;resize:vertical;">{{ fee.description }}</textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary"><i data-lucide="save" style="width:16px;height:16px;"></i> Save Changes</button>
+                    <a href="{% url 'core:accountant_fees' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+{% endblock %}

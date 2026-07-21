@@ -1,0 +1,25 @@
+{% load static %}
+<nav class="sidebar" id="sidebar">
+    <button class="sidebar-close" onclick="toggleSidebar()" aria-label="Close menu"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
+    <div class="sidebar-logo">
+        {% include 'components/logo.html' with size=36 %}
+        <span>Edosaic</span>
+    </div>
+    <div class="sidebar-profile">
+        <div class="avatar">{{ user.username.0|upper }}</div>
+        <div class="user-info">
+            <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+            <div class="role-badge">Accountant</div>
+        </div>
+    </div>
+    <div class="sidebar-nav">
+        <a href="{% url 'core:accountant_dashboard' %}" {% if active == 'dashboard' %}class="active"{% endif %}><span class="icon"><i data-lucide="layout-dashboard" style="width:18px;height:18px;"></i></span> Dashboard</a>
+        <a href="{% url 'core:accountant_fees' %}" {% if active == 'fees' %}class="active"{% endif %}><span class="icon"><i data-lucide="indian-rupee" style="width:18px;height:18px;"></i></span> Fee Records</a>
+        <a href="{% url 'core:accountant_add_fee' %}" {% if active == 'add_fee' %}class="active"{% endif %}><span class="icon"><i data-lucide="plus-circle" style="width:18px;height:18px;"></i></span> Add Fee</a>
+        <a href="{% url 'core:accountant_collections' %}" {% if active == 'collections' %}class="active"{% endif %}><span class="icon"><i data-lucide="wallet" style="width:18px;height:18px;"></i></span> Collections</a>
+    </div>
+    <div class="sidebar-footer">
+        <a href="{% url 'accounts:profile' %}" class="btn btn-secondary btn-block btn-sm" style="margin-bottom:8px;"><i data-lucide="user" style="width:14px;height:14px;"></i> My Profile</a>
+        <a href="{% url 'accounts:logout' %}" class="btn btn-danger btn-block btn-sm"><i data-lucide="log-out" style="width:14px;height:14px;"></i> Logout</a>
+    </div>
+</nav>

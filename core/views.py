@@ -22,6 +22,8 @@ def dashboard_router(request):
     role = request.user.role
     if role == 'admin':
         return redirect('core:admin_dashboard')
+    elif role == 'accountant':
+        return redirect('core:accountant_dashboard')
     elif role == 'faculty':
         return redirect('core:faculty_dashboard')
     elif role == 'student':
@@ -247,3 +249,119 @@ def parent_dashboard(request):
     except Parent.DoesNotExist:
         parent_obj = None
     return render(request, 'parent/dashboard.html', {'parent_obj': parent_obj})
+
+
+@login_required
+def accountant_dashboard(request):
+    if request.user.role != 'accountant':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    fees = Fee.objects.filter(institution=inst)
+    total_collected = fees.filter(status='Paid').aggregate(total=Sum('amount'))['total'] or 0
+    total_pending = fees.filter(status='Pending').aggregate(total=Sum('amount'))['total'] or 0
+    total_partial = fees.filter(status='Partial').aggregate(total=Sum('amount'))['total'] or 0
+    recent_fees = fees.select_related('student').order_by('-created_at')[:10]
+    return render(request, 'accountant/dashboard.html', {
+        'total_collected': total_collected,
+        'total_pending': total_pending,
+        'total_partial': total_partial,
+        'total_records': fees.count(),
+        'recent_fees': recent_fees,
+    })
+
+
+@login_required
+def accountant_fees(request):
+    if request.user.role != 'accountant':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    fees = Fee.objects.filter(institution=inst).select_related('student').order_by('-created_at')
+    status = request.GET.get('status', '')
+    q = request.GET.get('q', '').strip()
+    if status:
+        fees = fees.filter(status=status)
+    if q:
+        fees = fees.filter(Q(student__name__icontains=q))
+    if request.method == 'POST' and request.POST.get('delete_id'):
+        fid = request.POST.get('delete_id')
+        try:
+            f = Fee.objects.get(pk=fid, institution=inst)
+            log_audit(request.user, 'delete_fee', f"Deleted fee record for {f.student.name}", 'fees')
+            f.delete()
+            messages.success(request, 'Fee record deleted.')
+        except Fee.DoesNotExist:
+            messages.error(request, 'Fee record not found.')
+        return redirect('core:accountant_fees')
+    return render(request, 'accountant/fees.html', {
+        'fees': fees, 'status_filter': status, 'q': q,
+    })
+
+
+@login_required
+def accountant_add_fee(request):
+    if request.user.role != 'accountant':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    students = Student.objects.filter(institution=inst).order_by('name')
+    if request.method == 'POST':
+        student_id = request.POST.get('student')
+        amount = request.POST.get('amount', 0)
+        due_date = request.POST.get('due_date', '')
+        fee_type = request.POST.get('fee_type', 'Tuition')
+        status = request.POST.get('status', 'Pending')
+        description = request.POST.get('description', '').strip()
+        errors = []
+        if not student_id:
+            errors.append('Please select a student.')
+        if not amount or float(amount) <= 0:
+            errors.append('Amount must be greater than 0.')
+        if not due_date:
+            errors.append('Due date is required.')
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+            return render(request, 'accountant/add_fee.html', {'students': students})
+        student = get_object_or_404(Student, pk=student_id, institution=inst)
+        Fee.objects.create(
+            institution=inst, student=student,
+            amount=float(amount), due_date=due_date,
+            fee_type=fee_type, status=status, description=description,
+        )
+        log_audit(request.user, 'add_fee', f"Added fee ₹{amount} for {student.name}", 'fees')
+        messages.success(request, f'Fee record added for {student.name}.')
+        return redirect('core:accountant_fees')
+    return render(request, 'accountant/add_fee.html', {'students': students})
+
+
+@login_required
+def accountant_edit_fee(request, fee_id):
+    if request.user.role != 'accountant':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    fee = get_object_or_404(Fee, pk=fee_id, institution=inst)
+    students = Student.objects.filter(institution=inst).order_by('name')
+    if request.method == 'POST':
+        fee.student_id = request.POST.get('student', fee.student_id)
+        fee.amount = float(request.POST.get('amount', fee.amount))
+        fee.due_date = request.POST.get('due_date', fee.due_date)
+        fee.fee_type = request.POST.get('fee_type', fee.fee_type)
+        fee.status = request.POST.get('status', fee.status)
+        fee.description = request.POST.get('description', fee.description).strip()
+        fee.save()
+        log_audit(request.user, 'edit_fee', f"Updated fee for {fee.student.name}", 'fees')
+        messages.success(request, 'Fee record updated.')
+        return redirect('core:accountant_fees')
+    return render(request, 'accountant/edit_fee.html', {'fee': fee, 'students': students})
+
+
+@login_required
+def accountant_collections(request):
+    if request.user.role != 'accountant':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    fees = Fee.objects.filter(institution=inst, status='Paid').select_related('student').order_by('-created_at')
+    total = fees.aggregate(total=Sum('amount'))['total'] or 0
+    by_type = fees.values('fee_type').annotate(total=Sum('amount'), count=Count('id'))
+    return render(request, 'accountant/collections.html', {
+        'fees': fees, 'total': total, 'by_type': by_type,
+    })

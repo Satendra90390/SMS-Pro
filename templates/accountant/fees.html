@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Fee Records - Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/accountant_sidebar.html' with active='fees' %}
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Fee Records</h1>
+                <div class="subtitle">Manage all student fee records</div>
+            </div>
+        </div>
+
+        <div class="card mb-20">
+            <div class="card-header">
+                <div class="card-title"><span class="dot" style="background:#fbbf24;"></span> All Fee Records</div>
+                <div class="card-actions">
+                    <form class="search-form" method="GET">
+                        <input type="text" name="q" placeholder="Search student..." value="{{ q }}">
+                        <button type="submit" class="btn btn-sm btn-secondary">Search</button>
+                    </form>
+                    <a href="{% url 'core:accountant_add_fee' %}" class="btn btn-sm btn-primary"><i data-lucide="plus" style="width:14px;height:14px;"></i> Add Fee</a>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+                <a href="{% url 'core:accountant_fees' %}" class="btn btn-sm {% if not status_filter %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
+                <a href="{% url 'core:accountant_fees' %}?status=Paid" class="btn btn-sm {% if status_filter == 'Paid' %}btn-primary{% else %}btn-secondary{% endif %}">Paid</a>
+                <a href="{% url 'core:accountant_fees' %}?status=Pending" class="btn btn-sm {% if status_filter == 'Pending' %}btn-primary{% else %}btn-secondary{% endif %}">Pending</a>
+                <a href="{% url 'core:accountant_fees' %}?status=Partial" class="btn btn-sm {% if status_filter == 'Partial' %}btn-primary{% else %}btn-secondary{% endif %}">Partial</a>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Student</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fee in fees %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td class="td-name">{{ fee.student.name }}</td>
+                            <td class="td-amount">&#8377;{{ fee.amount|floatformat:0 }}</td>
+                            <td>{{ fee.fee_type }}</td>
+                            <td>
+                                <span class="badge {% if fee.status == 'Paid' %}badge-green{% elif fee.status == 'Pending' %}badge-red{% else %}badge-yellow{% endif %}">
+                                    {{ fee.status }}
+                                </span>
+                            </td>
+                            <td>{{ fee.due_date|default:"-" }}</td>
+                            <td>
+                                <div style="display:flex;gap:6px;">
+                                    <a href="{% url 'core:accountant_edit_fee' fee.id %}" class="btn btn-sm btn-secondary">Edit</a>
+                                    <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this fee record?')">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="delete_id" value="{{ fee.id }}">
+                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state"><div class="icon"><i data-lucide="indian-rupee" style="width:48px;height:48px;"></i></div><h3>No fee records found</h3></div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
