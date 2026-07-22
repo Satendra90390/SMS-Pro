@@ -13,7 +13,24 @@ from django.http import JsonResponse
 def landing_page(request):
     if request.user.is_authenticated:
         return redirect('core:dashboard')
+    if not request.session.get('turnstile_verified'):
+        return redirect('accounts:verify')
     return render(request, 'accounts/landing.html')
+
+
+@ratelimit(key='ip', rate='10/m', method='POST', block=True)
+def verify_view(request):
+    if request.user.is_authenticated:
+        return redirect('core:dashboard')
+    if request.session.get('turnstile_verified'):
+        return redirect('accounts:landing')
+    if request.method == 'POST':
+        token = request.POST.get('cf-turnstile-response', '')
+        if verify_turnstile(token, request.META.get('REMOTE_ADDR')):
+            request.session['turnstile_verified'] = True
+            return redirect('accounts:landing')
+        messages.error(request, 'Verification failed. Please try again.')
+    return render(request, 'accounts/verify.html')
 
 
 @ratelimit(key='ip', rate='5/m', method='POST', block=True)

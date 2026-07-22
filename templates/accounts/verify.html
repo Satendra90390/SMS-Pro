@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Verify You're Human — Edosaic{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/auth.css' %}?v=3">{% endblock %}
+{% block messages %}{% endblock %}
+{% block body %}
+<nav class="auth-nav">
+    <a href="/" class="auth-nav-brand">
+        {% include 'components/logo.html' with size=28 %}
+        <span>Edosaic</span>
+    </a>
+</nav>
+
+<div class="auth-page" style="display:flex;align-items:center;justify-content:center;">
+    <div class="auth-form-panel" style="width:100%;max-width:440px;padding:48px 40px;">
+        <div class="auth-card">
+            <div class="auth-card-header" style="text-align:center;">
+                <div class="mobile-logo">
+                    <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="52" height="52" rx="14" fill="url(#mlv)"/>
+                        <defs><linearGradient id="mlv" x1="0" y1="0" x2="52" y2="52"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
+                        <path d="M13 37 C13 37, 19 18, 26 15 C33 18, 39 37, 39 37" stroke="white" stroke-width="2.8" stroke-linecap="round" fill="none" opacity="0.9"/>
+                        <circle cx="26" cy="23" r="2.5" fill="white" opacity="0.95"/>
+                    </svg>
+                </div>
+                <h1>Verify You're Human</h1>
+                <p class="subtitle">Complete the verification below to access Edosaic</p>
+            </div>
+
+            {% if messages %}
+            <div class="auth-messages">
+                {% for message in messages %}
+                <div class="auth-msg auth-msg-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+                {% if TURNSTILE_SITE_KEY %}
+                <div class="form-group" style="margin-bottom:20px;">
+                    <div class="cf-turnstile" data-sitekey="{{ TURNSTILE_SITE_KEY }}" data-theme="auto" data-callback="onTurnstileSuccess"></div>
+                </div>
+                {% endif %}
+                <button type="submit" class="auth-submit" id="verify-btn">
+                    Continue to Edosaic <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+                </button>
+            </form>
+
+            <div class="auth-footer" style="margin-top:16px;">
+                <span style="font-size:12px;color:var(--text-tertiary);">Protected by Cloudflare Turnstile</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if not TURNSTILE_SITE_KEY %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('verify-btn').disabled = false;
+});
+</script>
+{% endif %}
+{% endblock %}
