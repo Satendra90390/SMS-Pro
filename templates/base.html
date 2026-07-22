@@ -44,11 +44,6 @@
     {% endblock %}
     {% block body %}{% endblock %}
 
-    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-        <span class="icon-sun">&#9728;</span>
-        <span class="icon-moon">&#9790;</span>
-    </button>
-
     {% block chat_widget %}
     {% if user.is_authenticated %}
     <!-- STAN Chat Widget -->

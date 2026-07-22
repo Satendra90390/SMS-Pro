@@ -11,6 +11,10 @@
     </a>
     <div class="auth-nav-links">
         <a href="/">Home</a>
+        <button class="theme-toggle-nav" onclick="toggleTheme()" aria-label="Toggle theme">
+            <span class="icon-sun">&#9728;</span>
+            <span class="icon-moon">&#9790;</span>
+        </button>
         <a href="{% url 'accounts:login' %}" class="auth-nav-btn">Sign In</a>
     </div>
 </nav>
