@@ -5,13 +5,13 @@
     {% include 'components/librarian_sidebar.html' with active='dashboard' %}
     <main class="main-content">
         <button class="hamburger" onclick="toggleSidebar()"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
-        <div class="page-header">
-            <div class="header-avatar">{{ user.username.0|upper }}</div>
-            <div>
-                <h1>Library Dashboard</h1>
-                <div class="subtitle">Overview of library operations</div>
-            </div>
+    <div class="page-header">
+        <div class="header-avatar">{{ user.username.0|upper }}</div>
+        <div>
+            <h1>Welcome back, {{ user.get_full_name|default:user.username }}</h1>
+            <div class="subtitle">{{ institution.name }}</div>
         </div>
+    </div>
 
         <div class="stat-grid">
             <div class="stat-card">

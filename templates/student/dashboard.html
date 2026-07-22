@@ -6,13 +6,13 @@
 
     <main class="main-content">
         <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
-        <div class="page-header">
-            <div class="header-avatar">{{ user.username.0|upper }}</div>
-            <div>
-                <h1>Student Dashboard</h1>
-                <div class="subtitle">Welcome back, {{ user.get_full_name|default:user.username }}</div>
-            </div>
+    <div class="page-header">
+        <div class="header-avatar">{{ user.username.0|upper }}</div>
+        <div>
+            <h1>Welcome back, {{ user.get_full_name|default:user.username }}</h1>
+            <div class="subtitle">{{ institution.name }}</div>
         </div>
+    </div>
 
         <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
             <div class="stat-card">
