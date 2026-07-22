@@ -247,11 +247,17 @@
     border-color: var(--brand-400); color: var(--brand-400);
     transform: scale(1.1);
 }
-.theme-toggle .icon-sun, .theme-toggle .icon-moon { display: none; }
-[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
-[data-theme="light"] .theme-toggle .icon-moon { display: block; }
-:root:not([data-theme]) .theme-toggle .icon-moon { display: block; }
+.theme-toggle .icon-sun, .theme-toggle .icon-moon,
+.theme-toggle-nav .icon-sun, .theme-toggle-nav .icon-moon { display: none; }
+[data-theme="dark"] .theme-toggle .icon-sun,
+[data-theme="dark"] .theme-toggle-nav .icon-sun { display: block; }
+[data-theme="light"] .theme-toggle .icon-moon,
+[data-theme="light"] .theme-toggle-nav .icon-moon { display: block; }
+:root:not([data-theme]) .theme-toggle .icon-moon,
+:root:not([data-theme]) .theme-toggle-nav .icon-moon { display: block; }
 @media (prefers-color-scheme: dark) {
-    :root:not([data-theme]) .theme-toggle .icon-sun { display: block; }
-    :root:not([data-theme]) .theme-toggle .icon-moon { display: none; }
+    :root:not([data-theme]) .theme-toggle .icon-sun,
+    :root:not([data-theme]) .theme-toggle-nav .icon-sun { display: block; }
+    :root:not([data-theme]) .theme-toggle .icon-moon,
+    :root:not([data-theme]) .theme-toggle-nav .icon-moon { display: none; }
 }
