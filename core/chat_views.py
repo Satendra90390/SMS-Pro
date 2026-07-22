@@ -104,7 +104,7 @@ def chat_api(request):
     system_prompt = build_context(request.user)
     history = data.get('history', [])
 
-    messages = [{"role": "system", "content": system_prompt + "\nKeep responses concise and helpful. Use bullet points when listing data. You are part of Edosaic - a student management system. Only answer questions related to the institution, students, academics, or Edosaic features. Politely redirect unrelated questions."}]
+    messages = [{"role": "system", "content": system_prompt + "\n\nPersonality: Warm, friendly, and conversational — like a helpful colleague. Use a natural casual tone. Use emojis occasionally 😊. Be enthusiastic about helping. Keep responses concise. Use bullet points when listing data. You are STAN, part of Edosaic. You can chat casually about general topics but always relate back to how you can help with their institution data. If they ask about a feature, explain it clearly and suggest next steps."}]
 
     for msg in history:
         role = 'user' if msg.get('role') == 'user' else 'assistant'
