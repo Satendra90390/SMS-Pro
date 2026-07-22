@@ -395,6 +395,9 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             </button>
         </form>
+        {% if TURNSTILE_SITE_KEY %}
+        <div class="cf-turnstile" data-sitekey="{{ TURNSTILE_SITE_KEY }}" data-theme="auto" data-size="invisible" style="position:absolute;pointer-events:none;opacity:0;width:0;height:0;overflow:hidden;"></div>
+        {% endif %}
     </div>
 </div>
 
@@ -464,10 +467,17 @@ function sendMessage(e) {
     input.value = '';
     chatHistory.push({role: 'user', parts: [{text: msg}]});
     addTyping();
+    var payload = {message: msg, history: chatHistory.slice(-10)};
+    var turnstileInput = document.querySelector('[name="cf-turnstile-response"]');
+    if (turnstileInput) payload.turnstile_token = turnstileInput.value;
+    else if (typeof turnstile !== 'undefined') {
+        var w = document.querySelector('.cf-turnstile');
+        if (w) payload.turnstile_token = turnstile.getResponse(w);
+    }
     fetch('/chat/', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({message: msg, history: chatHistory.slice(-10)})
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': (document.cookie.match('(^|;) ?csrftoken=([^;]*)(;|$)') || [])[2] || ''},
+        body: JSON.stringify(payload)
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
