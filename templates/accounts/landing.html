@@ -47,6 +47,10 @@
             <a href="#footer">Contact</a>
         </div>
         <div class="nav-actions">
+            <button class="theme-toggle-nav" onclick="toggleTheme()" aria-label="Toggle theme">
+                <span class="icon-sun">&#9728;</span>
+                <span class="icon-moon">&#9790;</span>
+            </button>
             <a href="{% url 'accounts:login' %}" class="btn btn-nav-login">Login</a>
             <a href="{% url 'accounts:self_register' %}" class="btn btn-nav-register">Sign Up</a>
         </div>
@@ -355,20 +359,16 @@
         </div>
         <div class="footer-bottom">
             <p>&copy; 2026 Edosaic. All rights reserved.</p>
-            <div class="footer-social">
-                <a href="#" title="Twitter">&#120143;</a>
-                <a href="#" title="GitHub">&#128187;</a>
-                <a href="#" title="LinkedIn">&#128279;</a>
+            <div class="footer-bottom-links">
+                <a href="https://github.com/Satendra90390/Edosaic" target="_blank">Open Source</a>
+                <span style="opacity:0.3;">|</span>
+                <a href="#features">Features</a>
+                <span style="opacity:0.3;">|</span>
+                <a href="{% url 'accounts:self_register' %}">Get Started</a>
             </div>
         </div>
     </div>
 </footer>
-
-<!-- Theme Toggle -->
-<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-    <span class="icon-sun">&#9728;</span>
-    <span class="icon-moon">&#9790;</span>
-</button>
 
 <!-- STAN Chat Widget -->
 <div id="chat-widget">
