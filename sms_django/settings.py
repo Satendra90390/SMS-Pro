@@ -124,7 +124,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 ACCOUNT_LOGIN_METHODS = {'username'}
-ACCOUNT_SIGNUP_FIELDS = ['email', 'username', 'password1', 'password2']
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username', 'password1', 'password2']
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory' if PRODUCTION else 'none'
 
 LOGIN_URL = '/login/'
