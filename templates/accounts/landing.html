@@ -11,9 +11,6 @@
     <link rel="stylesheet" href="{% static 'css/landing.css' %}?v=3">
     <link rel="stylesheet" href="{% static 'css/chat.css' %}?v=3">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-    {% if TURNSTILE_SITE_KEY %}
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-    {% endif %}
     <script>
         (function() {
             var saved = localStorage.getItem('sms-theme');
@@ -374,9 +371,6 @@
 </button>
 
 <!-- STAN Chat Widget -->
-{% if TURNSTILE_SITE_KEY %}
-<div class="cf-turnstile" data-sitekey="{{ TURNSTILE_SITE_KEY }}" data-theme="auto" data-size="invisible" style="position:absolute;pointer-events:none;opacity:0;width:0;height:0;overflow:hidden;"></div>
-{% endif %}
 <div id="chat-widget">
     <button id="chat-toggle" onclick="toggleChat()" aria-label="STAN">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -470,17 +464,10 @@ function sendMessage(e) {
     input.value = '';
     chatHistory.push({role: 'user', parts: [{text: msg}]});
     addTyping();
-    var payload = {message: msg, history: chatHistory.slice(-10)};
-    var turnstileInput = document.querySelector('[name="cf-turnstile-response"]');
-    if (turnstileInput) payload.turnstile_token = turnstileInput.value;
-    else if (typeof turnstile !== 'undefined') {
-        var w = document.querySelector('.cf-turnstile');
-        if (w) payload.turnstile_token = turnstile.getResponse(w);
-    }
     fetch('/chat/', {
         method: 'POST',
         headers: {'Content-Type': 'application/json', 'X-CSRFToken': (document.cookie.match('(^|;) ?csrftoken=([^;]*)(;|$)') || [])[2] || ''},
-        body: JSON.stringify(payload)
+        body: JSON.stringify({message: msg, history: chatHistory.slice(-10)})
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {

@@ -5,7 +5,6 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django_ratelimit.decorators import ratelimit
-from sms_django.turnstile import verify_turnstile
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODEL = "llama-3.1-8b-instant"
@@ -30,10 +29,6 @@ def public_chat_api(request):
 
     if not user_message:
         return JsonResponse({'error': 'Message is required'}, status=400)
-
-    token = data.get('turnstile_token', '')
-    if not verify_turnstile(token, request.META.get('REMOTE_ADDR')):
-        return JsonResponse({'error': 'Human verification failed.'}, status=403)
 
     api_key = os.getenv('GROQ_API_KEY', '')
     if not api_key:
