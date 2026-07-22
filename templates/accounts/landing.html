@@ -473,7 +473,7 @@ function sendMessage(e) {
     .then(function(data) {
         var t = document.getElementById('typing-indicator');
         if (t) t.remove();
-        if (data.reply) { addMessage(data.reply, 'bot'); chatHistory.push({role: 'model', parts: [{text: data.reply}]}); }
+        if (data.reply) { addMessage(data.reply, 'bot'); chatHistory.push({role: 'model', parts: [{text: data.reply}]}); if (data.show_feedback) showFeedback(); }
         else if (data.error) addMessage(data.error, 'bot');
     })
     .catch(function() {
@@ -490,6 +490,23 @@ document.addEventListener('keydown', function(e) {
         if (box && !box.classList.contains('chat-hidden')) toggleChat();
     }
 });
+
+function showFeedback() {
+    var msgs = document.getElementById('chat-messages');
+    var existing = document.getElementById('chat-feedback');
+    if (existing) existing.remove();
+    var div = document.createElement('div');
+    div.id = 'chat-feedback';
+    div.className = 'chat-feedback';
+    div.innerHTML = '<p>Was this helpful?</p><div class="feedback-btns"><button onclick="sendFeedback(\'great\')" title="Great">👍</button><button onclick="sendFeedback(\'ok\')" title="OK">😐</button><button onclick="sendFeedback(\'bad\')" title="Not helpful">👎</button></div>';
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+}
+
+function sendFeedback(rating) {
+    var el = document.getElementById('chat-feedback');
+    if (el) el.innerHTML = '<p style="color:var(--text-secondary);">Thanks for your feedback!</p>';
+}
 </script>
 </body>
 </html>

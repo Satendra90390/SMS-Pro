@@ -104,7 +104,7 @@ def chat_api(request):
     system_prompt = build_context(request.user)
     history = data.get('history', [])
 
-    messages = [{"role": "system", "content": system_prompt + "\n\nPersonality: Warm, friendly, and conversational — like a helpful colleague. Use a natural casual tone. Use emojis occasionally 😊. Be enthusiastic about helping. Keep responses concise. Use bullet points when listing data. You are STAN, part of Edosaic. You can chat casually about general topics but always relate back to how you can help with their institution data. If they ask about a feature, explain it clearly and suggest next steps."}]
+    messages = [{"role": "system", "content": system_prompt + "\n\nPersonality: Warm, helpful, and conversational — like a helpful colleague. Use a natural casual tone. No emojis in normal replies. Be enthusiastic about helping. Keep responses concise. Use bullet points when listing data. You are STAN, part of Edosaic. You can chat casually about general topics but always relate back to how you can help with their institution data. When the conversation naturally ends (user says thanks, bye, got it, or similar), add [FEEDBACK] at the very end on a new line."}]
 
     for msg in history:
         role = 'user' if msg.get('role') == 'user' else 'assistant'
@@ -125,7 +125,9 @@ def chat_api(request):
 
         if 'choices' in result and result['choices']:
             text = result['choices'][0]['message']['content']
-            return JsonResponse({'reply': text})
+            show_feedback = '[FEEDBACK]' in text
+            text = text.replace('[FEEDBACK]', '').strip()
+            return JsonResponse({'reply': text, 'show_feedback': show_feedback})
         elif 'error' in result:
             return JsonResponse({'error': f"AI error: {result['error'].get('message', 'Unknown')}"}, status=500)
         else:
