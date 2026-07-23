@@ -36,9 +36,9 @@
         <a href="{% url 'core:admin_settings' %}" {% if active == 'settings' %}class="active"{% endif %}><span class="icon"><i data-lucide="settings" style="width:18px;height:18px;"></i></span> Settings</a>
     </div>
     <div class="sidebar-footer">
-        <button class="theme-toggle-nav" onclick="toggleTheme()" aria-label="Toggle theme" style="width:100%;margin-bottom:8px;">
-            <span class="icon-sun">&#9728;</span> Light Mode
-            <span class="icon-moon">&#9790;</span> Dark Mode
+        <button class="theme-toggle-sidebar" onclick="toggleTheme()" aria-label="Toggle theme">
+            <span class="icon-sun"></span> Light Mode
+            <span class="icon-moon"></span> Dark Mode
         </button>
         <a href="{% url 'accounts:profile' %}" class="btn btn-secondary btn-block btn-sm" style="margin-bottom:8px;"><i data-lucide="user" style="width:14px;height:14px;"></i> My Profile</a>
         <form method="post" action="{% url 'accounts:logout' %}" style="margin:0;">
