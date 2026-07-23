@@ -65,6 +65,20 @@ a { text-decoration: none; color: inherit; }
     color: var(--text-primary);
 }
 
+.brand-name {
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .brand-name {
+    background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
 .nav-links { display: flex; gap: 32px; }
 
 .nav-links a {
@@ -726,6 +740,7 @@ a { text-decoration: none; color: inherit; }
     color: white;
     font-weight: 700;
     font-size: 16px;
+    letter-spacing: 0.5px;
 }
 
 .footer-brand p {

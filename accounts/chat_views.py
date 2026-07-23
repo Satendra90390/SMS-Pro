@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django_ratelimit.decorators import ratelimit
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.1-8b-instant"
+GROQ_MODEL = "llama-3.3-70b-versatile"
 
 SYSTEM_PROMPT = """You are STAN, a helpful AI assistant for Edosaic — a Student Management System.
 
@@ -94,7 +94,7 @@ def public_chat_api(request):
     try:
         resp = requests.post(
             GROQ_URL,
-            json={"model": GROQ_MODEL, "messages": messages, "temperature": 0.7, "max_tokens": 256},
+            json={"model": GROQ_MODEL, "messages": messages, "temperature": 0.5, "max_tokens": 1024},
             headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
             timeout=30,
         )

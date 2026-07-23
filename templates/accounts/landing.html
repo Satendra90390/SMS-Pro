@@ -17,18 +17,74 @@
             if (saved) document.documentElement.setAttribute('data-theme', saved);
         })();
     </script>
+    <script>
+        // Auto-retry if Render cold start is taking too long
+        (function() {
+            var loaded = false;
+            window.addEventListener('load', function() { loaded = true; });
+            setTimeout(function() {
+                if (!loaded) {
+                    // Page still loading after 50s — Render might be stuck, retry
+                    window.location.reload();
+                }
+            }, 50000);
+        })();
+    </script>
 </head>
 <body>
 
+<!-- Loading Splash Screen -->
+<div id="splash" style="position:fixed;inset:0;z-index:99999;background:#050a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:opacity 0.5s ease, visibility 0.5s ease;">
+    <svg width="64" height="64" viewBox="0 0 40 40" fill="none" style="filter:drop-shadow(0 0 24px rgba(99,102,241,0.4));animation:splashPulse 2s ease-in-out infinite;">
+        <rect width="40" height="40" rx="10" fill="url(#splashGrad)"/>
+        <defs><linearGradient id="splashGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop stop-color="#6366f1"/><stop offset="50%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient></defs>
+        <rect x="0.5" y="0.5" width="39" height="39" rx="9.5" fill="none" stroke="white" stroke-width="0.5" opacity="0.15"/>
+        <path d="M12 28 C12 28, 14 16, 20 13 C26 16, 28 28, 28 28" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.92"/>
+        <circle cx="20" cy="19" r="2.5" fill="white" opacity="0.95"/>
+    </svg>
+    <div style="color:#a5b4fc;font-size:15px;font-weight:600;font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif;letter-spacing:0.3px;">Edosaic</div>
+    <div style="display:flex;gap:6px;align-items:center;">
+        <span style="width:7px;height:7px;border-radius:50%;background:#6366f1;animation:splashDot 1.4s ease-in-out infinite;"></span>
+        <span style="width:7px;height:7px;border-radius:50%;background:#818cf8;animation:splashDot 1.4s ease-in-out 0.2s infinite;"></span>
+        <span style="width:7px;height:7px;border-radius:50%;background:#a5b4fc;animation:splashDot 1.4s ease-in-out 0.4s infinite;"></span>
+    </div>
+    <div style="color:#64748b;font-size:12px;font-family:Inter,-apple-system,BlinkMacSystemFont,sans-serif;">Loading...</div>
+</div>
+<style>
+@keyframes splashPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.05);opacity:0.8}}
+@keyframes splashDot{0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1}}
+</style>
+<script>
+window.addEventListener('load', function() {
+    var splash = document.getElementById('splash');
+    if (splash) {
+        splash.style.opacity = '0';
+        splash.style.visibility = 'hidden';
+        setTimeout(function() { splash.remove(); }, 600);
+    }
+});
+</script>
+
 <!-- SVG Logo Definition (reusable) -->
 <svg style="position:absolute;width:0;height:0;overflow:hidden" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#6366f1"/>
+            <stop offset="50%" stop-color="#7c3aed"/>
+            <stop offset="100%" stop-color="#a78bfa"/>
+        </linearGradient>
+        <filter id="lg-glow">
+            <feGaussianBlur stdDeviation="1.5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+    </defs>
     <symbol id="edosaic-logo" viewBox="0 0 40 40">
-        <rect width="40" height="40" rx="12" fill="url(#lg)"/>
-        <defs><linearGradient id="lg" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
-        <path d="M10 28 C10 28, 14 14, 20 12 C26 14, 30 28, 30 28" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.9"/>
-        <path d="M10 28 C12 24, 15 20, 20 19" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.4"/>
-        <path d="M30 28 C28 24, 25 20, 20 19" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.4"/>
-        <circle cx="20" cy="19" r="2" fill="white" opacity="0.95"/>
+        <rect width="40" height="40" rx="10" fill="url(#lg)"/>
+        <rect x="0.5" y="0.5" width="39" height="39" rx="9.5" fill="none" stroke="white" stroke-width="0.5" opacity="0.15"/>
+        <path d="M12 28 C12 28, 14 16, 20 13 C26 16, 28 28, 28 28" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.92"/>
+        <path d="M12 28 C14 24, 16 21, 20 19.5" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.4"/>
+        <path d="M28 28 C26 24, 24 21, 20 19.5" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.4"/>
+        <circle cx="20" cy="19" r="2.5" fill="white" opacity="0.95" filter="url(#lg-glow)"/>
     </symbol>
 </svg>
 
@@ -37,7 +93,7 @@
     <div class="nav-inner">
         <a href="/" class="nav-brand">
             <div class="nav-logo"><svg><use href="#edosaic-logo"/></svg></div>
-                    <span>Edosaic</span>
+            <span class="brand-name">Edosaic</span>
         </a>
         <div class="nav-links">
             <a href="#home">Home</a>
@@ -332,7 +388,7 @@
             <div class="footer-brand">
                 <div class="footer-logo">
                     <svg width="32" height="32" viewBox="0 0 40 40"><use href="#edosaic-logo"/></svg>
-            <span>Edosaic</span>
+                    <span class="brand-name">Edosaic</span>
                 </div>
                 <p>Complete student management solution for modern educational institutions.</p>
             </div>
@@ -378,7 +434,7 @@
     <div id="chat-box" class="chat-hidden">
         <div class="chat-header">
             <div class="chat-header-info">
-                <svg width="20" height="20" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="12" fill="url(#cbgl)"/><defs><linearGradient id="cbgl" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs><path d="M10 28 C10 28, 14 14, 20 12 C26 14, 30 28, 30 28" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.9"/><circle cx="20" cy="19" r="2" fill="white" opacity="0.95"/></svg>
+                <svg width="20" height="20" viewBox="0 0 40 40" fill="none"><defs><linearGradient id="cbgl" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6366f1"/><stop offset="50%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient></defs><rect width="40" height="40" rx="10" fill="url(#cbgl)"/><path d="M12 28 C12 28, 14 16, 20 13 C26 16, 28 28, 28 28" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.92"/><circle cx="20" cy="19" r="2.5" fill="white" opacity="0.95"/></svg>
                 <span>STAN</span>
             </div>
             <div style="display:flex;gap:4px;">
@@ -457,7 +513,7 @@ function addMessage(text, sender) {
 
 function formatBotText(text) {
     var escaped = escapeHtml(text);
-    var logoSvg = '<svg width="20" height="20" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#clgl)"/><defs><linearGradient id="clgl" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs><path d="M10 28 C10 28, 14 14, 20 12 C26 14, 30 28, 30 28" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.9"/><circle cx="20" cy="19" r="2" fill="white" opacity="0.95"/></svg>';
+    var logoSvg = '<svg width="20" height="20" viewBox="0 0 40 40" fill="none"><defs><linearGradient id="clgl" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6366f1"/><stop offset="50%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient></defs><rect width="40" height="40" rx="10" fill="url(#clgl)"/><path d="M12 28 C12 28, 14 16, 20 13 C26 16, 28 28, 28 28" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.92"/><circle cx="20" cy="19" r="2.5" fill="white" opacity="0.95"/></svg>';
     var urlRegex = /(https?:\/\/[^\s<]+)/g;
     escaped = escaped.replace(urlRegex, function(url) {
         if (url.indexOf('/signup/') !== -1) {

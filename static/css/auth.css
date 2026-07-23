@@ -32,6 +32,14 @@
     font-weight: 700;
     font-size: 16px;
     color: var(--text-primary);
+    letter-spacing: 0.5px;
+}
+
+[data-theme="dark"] .auth-nav-brand span {
+    background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .auth-nav-links {

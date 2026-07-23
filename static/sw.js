@@ -1,4 +1,4 @@
-const CACHE_NAME = 'edosaic-v1';
+const CACHE_NAME = 'edosaic-v2';
 const STATIC_ASSETS = [
     '/',
     '/static/css/theme.css',
@@ -36,7 +36,10 @@ self.addEventListener('fetch', (event) => {
 
     if (request.method !== 'GET') return;
 
-    if (request.url.includes('/dashboard/') || request.url.includes('/login/') || request.url.includes('/verify/')) {
+    const url = new URL(request.url);
+
+    // Dashboard/auth pages: network first, fallback to cache
+    if (url.pathname.includes('/dashboard/') || url.pathname.includes('/login/') || url.pathname.includes('/verify/')) {
         event.respondWith(
             fetch(request).catch(() => {
                 return caches.match(request);
@@ -45,19 +48,40 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    event.respondWith(
-        caches.match(request).then((cached) => {
-            const fetched = fetch(request).then((response) => {
-                if (response && response.status === 200) {
-                    const clone = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(request, clone);
+    // Landing page & static assets: stale-while-revalidate
+    // Serve from cache instantly, update cache in background
+    if (url.pathname === '/' || url.pathname.startsWith('/static/') || url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
+        event.respondWith(
+            caches.open(CACHE_NAME).then((cache) => {
+                return cache.match(request).then((cached) => {
+                    const fetchPromise = fetch(request).then((response) => {
+                        if (response && response.status === 200) {
+                            cache.put(request, response.clone());
+                        }
+                        return response;
+                    }).catch(() => {
+                        // Server is down (Render cold start) — return cached version
+                        return cached;
                     });
-                }
-                return response;
-            }).catch(() => cached);
 
-            return cached || fetched;
-        })
+                    // Return cached version immediately if available, otherwise wait for network
+                    return cached || fetchPromise;
+                });
+            })
+        );
+        return;
+    }
+
+    // Everything else: network first, fallback to cache
+    event.respondWith(
+        fetch(request).then((response) => {
+            if (response && response.status === 200) {
+                const clone = response.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(request, clone);
+                });
+            }
+            return response;
+        }).catch(() => caches.match(request))
     );
 });

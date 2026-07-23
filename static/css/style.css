@@ -160,6 +160,14 @@ a:hover { color: var(--text-link-hover); }
     color: var(--text-primary);
     font-weight: 700;
     font-size: 18px;
+    letter-spacing: 0.5px;
+}
+
+[data-theme="dark"] .sidebar-logo span {
+    background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .sidebar-profile {
