@@ -20,8 +20,8 @@
     </div>
     <div class="sidebar-footer">
         <button class="theme-toggle-sidebar" onclick="toggleTheme()" aria-label="Toggle theme">
-            <span class="icon-sun"></span> Light Mode
-            <span class="icon-moon"></span> Dark Mode
+            <span class="icon-sun"></span><span class="icon-moon"></span>
+            <span class="label-light">Light Mode</span><span class="label-dark">Dark Mode</span>
         </button>
         <a href="{% url 'accounts:profile' %}" class="btn btn-secondary btn-block btn-sm" style="margin-bottom:8px;"><i data-lucide="user" style="width:14px;height:14px;"></i> My Profile</a>
         <form method="post" action="{% url 'accounts:logout' %}" style="margin:0;">

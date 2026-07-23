@@ -21,48 +21,83 @@
             {% if messages %}
             <div style="margin-bottom:16px;">
                 {% for msg in messages %}
-                <p style="color:#ef4444;font-size:13px;text-align:center;">{{ msg }}</p>
+                <p style="color:{% if msg.tags == 'success' %}#22c55e{% else %}#ef4444{% endif %};font-size:13px;text-align:center;">{{ msg }}</p>
                 {% endfor %}
             </div>
             {% endif %}
 
-            <form method="post" class="auth-form">
+            <form method="post" class="auth-form" id="role-form">
                 {% csrf_token %}
+                <input type="hidden" name="role" id="selected-role" value="{{ role|default:'' }}">
+
                 <div class="role-grid">
-                    <label class="role-card">
-                        <input type="radio" name="role" value="accountant" required>
-                        <div class="role-card-inner">
+                    <label class="role-card" onclick="selectRole('admin')">
+                        <div class="role-card-inner {% if role == 'admin' %}selected{% endif %}" data-role="admin">
+                            <div class="role-icon"><i data-lucide="shield" style="width:28px;height:28px;"></i></div>
+                            <strong>Admin</strong>
+                            <span>Register your institution</span>
+                        </div>
+                    </label>
+                    <label class="role-card" onclick="selectRole('accountant')">
+                        <div class="role-card-inner {% if role == 'accountant' %}selected{% endif %}" data-role="accountant">
                             <div class="role-icon"><i data-lucide="wallet" style="width:28px;height:28px;"></i></div>
                             <strong>Accountant</strong>
                             <span>Manage fees & payments</span>
                         </div>
                     </label>
-                    <label class="role-card">
-                        <input type="radio" name="role" value="faculty">
-                        <div class="role-card-inner">
+                    <label class="role-card" onclick="selectRole('faculty')">
+                        <div class="role-card-inner {% if role == 'faculty' %}selected{% endif %}" data-role="faculty">
                             <div class="role-icon"><i data-lucide="book-open" style="width:28px;height:28px;"></i></div>
                             <strong>Faculty</strong>
                             <span>Teach & manage students</span>
                         </div>
                     </label>
-                    <label class="role-card">
-                        <input type="radio" name="role" value="student">
-                        <div class="role-card-inner">
+                    <label class="role-card" onclick="selectRole('student')">
+                        <div class="role-card-inner {% if role == 'student' %}selected{% endif %}" data-role="student">
                             <div class="role-icon"><i data-lucide="graduation-cap" style="width:28px;height:28px;"></i></div>
                             <strong>Student</strong>
                             <span>Access courses & results</span>
                         </div>
                     </label>
-                    <label class="role-card">
-                        <input type="radio" name="role" value="parent">
-                        <div class="role-card-inner">
+                    <label class="role-card" onclick="selectRole('parent')">
+                        <div class="role-card-inner {% if role == 'parent' %}selected{% endif %}" data-role="parent">
                             <div class="role-icon"><i data-lucide="heart" style="width:28px;height:28px;"></i></div>
                             <strong>Parent</strong>
                             <span>Monitor your child's progress</span>
                         </div>
                     </label>
+                    <label class="role-card" onclick="selectRole('librarian')">
+                        <div class="role-card-inner {% if role == 'librarian' %}selected{% endif %}" data-role="librarian">
+                            <div class="role-icon"><i data-lucide="library" style="width:28px;height:28px;"></i></div>
+                            <strong>Librarian</strong>
+                            <span>Manage library books</span>
+                        </div>
+                    </label>
                 </div>
-                <button type="submit" class="auth-submit" style="margin-top:24px;">Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i></button>
+
+                <!-- Institution fields for non-admin roles -->
+                <div id="inst-fields" class="inst-fields {% if not role or role == 'admin' %}hidden{% endif %}">
+                    <div class="form-group" style="margin-top:20px;">
+                        <label>Institution Name</label>
+                        <div class="input-wrap">
+                            <input type="text" name="inst_name" id="inst-name" placeholder="Enter your institution name" value="{{ inst_name|default:'' }}">
+                            <span class="input-icon"><i data-lucide="building-2" style="width:18px;height:18px;"></i></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Invite Code</label>
+                        <div class="input-wrap">
+                            <input type="text" name="invite_code" id="invite-code" placeholder="Enter code from your admin" style="text-transform:uppercase;" maxlength="10">
+                            <span class="input-icon"><i data-lucide="key-round" style="width:18px;height:18px;"></i></span>
+                        </div>
+                        <span class="field-hint">Ask your institution admin for the invite code.</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-submit" style="margin-top:24px;" id="submit-btn">
+                    {% if role == 'admin' %}Register Institution{% else %}Continue{% endif %}
+                    <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+                </button>
             </form>
         </div>
     </div>
@@ -75,10 +110,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 12px;
 }
-.role-card {
-    cursor: pointer;
-}
-.role-card input { display: none; }
+.role-card { cursor: pointer; }
 .role-card-inner {
     display: flex;
     flex-direction: column;
@@ -91,13 +123,11 @@
     transition: all .2s ease;
     text-align: center;
 }
-.role-card input:checked + .role-card-inner {
-    border-color: var(--brand-500);
-    background: var(--brand-bg);
-    box-shadow: 0 0 0 3px var(--brand-glow);
-}
+.role-card-inner.selected,
 .role-card-inner:hover {
     border-color: var(--brand-400);
+    background: var(--brand-bg);
+    box-shadow: 0 0 0 3px var(--brand-glow);
     transform: translateY(-2px);
 }
 .role-icon {
@@ -109,5 +139,38 @@
 }
 .role-card-inner strong { font-size: 14px; color: var(--text-primary); }
 .role-card-inner span { font-size: 12px; color: var(--text-tertiary); }
+.inst-fields { transition: all .3s ease; }
+.inst-fields.hidden { display: none; }
+.field-hint { display: block; font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
 </style>
+
+<script>
+function selectRole(role) {
+    document.getElementById('selected-role').value = role;
+    var instFields = document.getElementById('inst-fields');
+    var submitBtn = document.getElementById('submit-btn');
+
+    document.querySelectorAll('.role-card-inner').forEach(function(el) {
+        el.classList.remove('selected');
+    });
+    event.currentTarget.querySelector('.role-card-inner').classList.add('selected');
+
+    if (role === 'admin') {
+        instFields.classList.add('hidden');
+        submitBtn.innerHTML = 'Register Institution <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>';
+    } else {
+        instFields.classList.remove('hidden');
+        submitBtn.innerHTML = 'Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>';
+    }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var currentRole = document.getElementById('selected-role').value;
+    if (currentRole && currentRole !== 'admin') {
+        document.getElementById('inst-fields').classList.remove('hidden');
+    }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>
 {% endblock %}

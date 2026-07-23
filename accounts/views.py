@@ -64,12 +64,48 @@ def role_select(request):
     user = request.user
     if not request.session.pop('oauth_new', False):
         return redirect('core:dashboard')
+
     if request.method == 'POST':
-        role = request.POST.get('role', '')
-        if role in ['accountant', 'faculty', 'student', 'parent']:
+        role = request.POST.get('role', '').strip()
+
+        if role == 'admin':
+            return redirect('accounts:register')
+
+        if role in ['accountant', 'faculty', 'student', 'parent', 'librarian']:
+            invite_code = request.POST.get('invite_code', '').strip().upper()
+            inst_name = request.POST.get('inst_name', '').strip()
+
+            if not inst_name:
+                messages.error(request, 'Please enter your institution name.')
+                return render(request, 'accounts/role_select.html', {'role': role, 'inst_name': inst_name})
+            if not invite_code:
+                messages.error(request, 'Please enter the invite code from your admin.')
+                return render(request, 'accounts/role_select.html', {'role': role, 'inst_name': inst_name})
+
+            try:
+                institution = Institution.objects.get(
+                    invite_code=invite_code,
+                    name__iexact=inst_name,
+                    is_active=True,
+                )
+            except Institution.DoesNotExist:
+                messages.error(request, 'Invalid institution name or invite code. Please check with your admin.')
+                return render(request, 'accounts/role_select.html', {'role': role, 'inst_name': inst_name})
+
             user.role = role
+            user.institution = institution
             user.save()
+
+            if role == 'student':
+                Student.objects.get_or_create(user=user, institution=institution, defaults={'full_name': user.get_full_name() or user.username})
+            elif role == 'faculty':
+                Faculty.objects.get_or_create(user=user, institution=institution, defaults={'full_name': user.get_full_name() or user.username})
+            elif role == 'parent':
+                Parent.objects.get_or_create(user=user, institution=institution, defaults={'full_name': user.get_full_name() or user.username})
+
+            messages.success(request, f'Welcome! You are registered as {role.title()} at {institution.name}.')
             return redirect('core:dashboard')
+
         messages.error(request, 'Please select a valid role.')
     return render(request, 'accounts/role_select.html')
 
