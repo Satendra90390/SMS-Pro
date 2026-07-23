@@ -9,15 +9,18 @@
         <div class="avatar">{{ user.username.0|upper }}</div>
         <div class="user-info">
             <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
-            <div class="role-badge">Administrator</div>
+            <div class="role-badge">Chairman</div>
         </div>
     </div>
     <div class="sidebar-nav">
         <a href="{% url 'core:admin_dashboard' %}" {% if active == 'dashboard' %}class="active"{% endif %}><span class="icon"><i data-lucide="layout-dashboard" style="width:18px;height:18px;"></i></span> Dashboard</a>
+        <a href="{% url 'core:chairman_directors' %}" {% if active == 'directors' %}class="active"{% endif %}><span class="icon"><i data-lucide="briefcase" style="width:18px;height:18px;"></i></span> Directors</a>
+        <a href="{% url 'core:chairman_add_director' %}" {% if active == 'add_director' %}class="active"{% endif %}><span class="icon"><i data-lucide="user-plus" style="width:18px;height:18px;"></i></span> Add Director</a>
+        <a href="{% url 'core:chairman_accountants' %}" {% if active == 'accountants' %}class="active"{% endif %}><span class="icon"><i data-lucide="wallet" style="width:18px;height:18px;"></i></span> Accountants</a>
+        <a href="{% url 'core:chairman_add_accountant' %}" {% if active == 'add_accountant' %}class="active"{% endif %}><span class="icon"><i data-lucide="user-plus" style="width:18px;height:18px;"></i></span> Add Accountant</a>
+
         <a href="{% url 'core:admin_students' %}" {% if active == 'students' %}class="active"{% endif %}><span class="icon"><i data-lucide="graduation-cap" style="width:18px;height:18px;"></i></span> Manage Students</a>
-        <a href="{% url 'core:admin_add_student' %}" {% if active == 'add_student' %}class="active"{% endif %}><span class="icon"><i data-lucide="user-plus" style="width:18px;height:18px;"></i></span> Add Student</a>
         <a href="{% url 'core:admin_faculty' %}" {% if active == 'faculty' %}class="active"{% endif %}><span class="icon"><i data-lucide="users" style="width:18px;height:18px;"></i></span> Manage Faculty</a>
-        <a href="{% url 'core:admin_add_faculty' %}" {% if active == 'add_faculty' %}class="active"{% endif %}><span class="icon"><i data-lucide="user-plus" style="width:18px;height:18px;"></i></span> Add Faculty</a>
 
         {% if institution.inst_type == 'School' %}
         <a href="{% url 'core:admin_courses' %}" {% if active == 'courses' %}class="active"{% endif %}><span class="icon"><i data-lucide="book-open" style="width:18px;height:18px;"></i></span> Classes</a>

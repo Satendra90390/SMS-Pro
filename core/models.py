@@ -38,6 +38,61 @@ class Institution(models.Model):
         return self.name
 
 
+class Chairman(models.Model):
+    institution = models.OneToOneField(Institution, on_delete=models.CASCADE, related_name='chairman_profile')
+    user = models.OneToOneField('accounts.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='chairman_profile')
+    name = models.CharField(max_length=200)
+    phone = models.CharField(max_length=15, blank=True)
+    email = models.EmailField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'chairman_details'
+
+    def __str__(self):
+        return self.name
+
+
+class Director(models.Model):
+    institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name='directors')
+    user = models.OneToOneField('accounts.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='director_profile')
+    name = models.CharField(max_length=200)
+    department = models.CharField(max_length=100, blank=True)
+    courses = models.ManyToManyField('Course', blank=True, related_name='directors')
+    phone = models.CharField(max_length=15, blank=True)
+    email = models.EmailField(blank=True)
+    qualification = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'director_details'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class HOD(models.Model):
+    institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name='hods')
+    user = models.OneToOneField('accounts.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='hod_profile')
+    name = models.CharField(max_length=200)
+    department = models.CharField(max_length=100)
+    courses = models.ManyToManyField('Course', blank=True, related_name='hods')
+    year = models.CharField(max_length=50, blank=True)
+    semester = models.CharField(max_length=50, blank=True)
+    phone = models.CharField(max_length=15, blank=True)
+    email = models.EmailField(blank=True)
+    qualification = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'hod_details'
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} ({self.department})"
+
+
 class Student(models.Model):
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name='students')
     user = models.OneToOneField('accounts.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='student_profile')
@@ -45,6 +100,12 @@ class Student(models.Model):
     age = models.PositiveIntegerField()
     sex = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')])
     phone = models.CharField(max_length=15)
+    course = models.ForeignKey('Course', on_delete=models.SET_NULL, null=True, blank=True, related_name='enrolled_students')
+    branch = models.ForeignKey('Branch', on_delete=models.SET_NULL, null=True, blank=True, related_name='enrolled_students')
+    year = models.CharField(max_length=50, blank=True)
+    semester = models.CharField(max_length=50, blank=True)
+    class_name = models.CharField(max_length=50, blank=True)
+    is_cr = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -63,6 +124,10 @@ class Faculty(models.Model):
     phone = models.CharField(max_length=15)
     qualification = models.CharField(max_length=100)
     email = models.EmailField(blank=True)
+    courses = models.ManyToManyField('Course', blank=True, related_name='faculty_members')
+    year = models.CharField(max_length=50, blank=True)
+    semester = models.CharField(max_length=50, blank=True)
+    mentors = models.ManyToManyField('Student', blank=True, related_name='mentors')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -215,22 +280,6 @@ class Fee(models.Model):
 
     def __str__(self):
         return f"{self.student.name} - ₹{self.amount} ({self.status})"
-
-
-class Parent(models.Model):
-    institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name='parents')
-    user = models.OneToOneField('accounts.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='parent_profile')
-    name = models.CharField(max_length=200)
-    phone = models.CharField(max_length=15)
-    email = models.EmailField(blank=True)
-    relationship = models.CharField(max_length=50, blank=True)
-    child = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='parents')
-
-    class Meta:
-        db_table = 'parents'
-
-    def __str__(self):
-        return f"{self.name} (Parent of {self.child.name})"
 
 
 class AuditLog(models.Model):

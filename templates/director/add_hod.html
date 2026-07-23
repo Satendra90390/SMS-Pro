@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Add HOD - Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/director_sidebar.html' with active='add_hod' %}
+
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Add New HOD</h1>
+                <div class="subtitle">Register a new Head of Department into the system</div>
+            </div>
+        </div>
+
+        <div class="card" style="max-width:720px;">
+            <div class="card-header">
+                <div class="card-title"><span class="dot" style="background:#34d399;"></span> HOD Information</div>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="name" placeholder="e.g. Dr. Anand Verma" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Department</label>
+                        <input type="text" name="department" placeholder="e.g. Mathematics" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="text" name="phone" placeholder="+91 98765 43210" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Qualification</label>
+                        <input type="text" name="qualification" placeholder="e.g. M.Sc, Ph.D">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Email (optional)</label>
+                    <input type="email" name="email" placeholder="hod@school.edu">
+                </div>
+                <div class="form-group">
+                    <label>Courses</label>
+                    <select name="courses" multiple style="min-height:100px;">
+                        {% for course in courses %}
+                        <option value="{{ course.pk }}">{{ course.name }}</option>
+                        {% empty %}
+                        <option disabled>No courses available</option>
+                        {% endfor %}
+                    </select>
+                    <small style="color:var(--text-secondary);font-size:12px;">Hold Ctrl/Cmd to select multiple courses</small>
+                </div>
+                <div class="form-divider">Login Credentials</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" name="username" placeholder="Choose a username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" name="password" placeholder="Min 6 characters" required>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary"><i data-lucide="check" style="width:16px;height:16px;"></i> Add HOD</button>
+                    <a href="{% url 'core:director_hods' %}" class="btn btn-secondary"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i> Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+{% endblock %}

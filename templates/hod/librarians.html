@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Librarians - Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/hod_sidebar.html' with active='librarians' %}
+
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Librarians</h1>
+                <div class="subtitle">Manage all librarians in your department</div>
+            </div>
+        </div>
+
+        <div class="card-header" style="margin-bottom:8px;">
+            <form method="get" class="search-form" style="display:flex;gap:8px;flex:1;max-width:400px;">
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search librarians..." style="flex:1;">
+                <button type="submit" class="btn btn-primary btn-sm"><i data-lucide="search" style="width:16px;height:16px;"></i></button>
+            </form>
+            <a href="{% url 'core:hod_add_librarian' %}" class="btn btn-primary"><i data-lucide="user-plus" style="width:16px;height:16px;"></i> Add Librarian</a>
+        </div>
+
+        <div class="card">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Username</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for librarian in librarians %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td class="td-name">
+                                <div class="user-cell">
+                                    <div class="avatar avatar-sm">{{ librarian.user.username.0|upper }}</div>
+                                    {{ librarian.user.get_full_name|default:librarian.user.username }}
+                                </div>
+                            </td>
+                            <td>{{ librarian.phone|default:"-" }}</td>
+                            <td>{{ librarian.user.username }}</td>
+                            <td>
+                                <form method="post" action="{% url 'core:hod_librarians' %}?delete={{ librarian.pk }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this librarian?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state"><div class="icon"><i data-lucide="library" style="width:48px;height:48px;"></i></div><h3>No librarians found</h3></div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}Director Dashboard - Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/director_sidebar.html' with active='dashboard' %}
+
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+    <div class="page-header">
+        <div class="header-avatar">{{ user.username.0|upper }}</div>
+        <div>
+            <h1>Welcome back, {{ user.get_full_name|default:user.username }}</h1>
+            <div class="subtitle">{{ institution.name }}</div>
+        </div>
+    </div>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="book-open" style="width:22px;height:22px;"></i></div>
+                <div>
+                    <div class="stat-value">{{ courses|length }}</div>
+                    <div class="stat-label">Courses Managed</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="users" style="width:22px;height:22px;"></i></div>
+                <div>
+                    <div class="stat-value">{{ faculty_count }}</div>
+                    <div class="stat-label">Faculty Under You</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="graduation-cap" style="width:22px;height:22px;"></i></div>
+                <div>
+                    <div class="stat-value">{{ student_count }}</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="building-2" style="width:22px;height:22px;"></i></div>
+                <div>
+                    <div class="stat-value">{{ department }}</div>
+                    <div class="stat-label">Department</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><span class="dot" style="background:#a78bfa;"></span> My Courses</div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Course Name</th>
+                            <th>Branch</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in courses %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td class="td-name">{{ course.name }}</td>
+                            <td>{{ course.branch|default:"-" }}</td>
+                            <td><span class="badge badge-blue">{{ course.duration|default:"-" }}</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">
+                                <div class="empty-state"><div class="icon"><i data-lucide="book-open" style="width:48px;height:48px;"></i></div><h3>No courses assigned yet</h3></div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top:8px;">
+            <div class="card-header">
+                <div class="card-title"><span class="dot" style="background:#34d399;"></span> Quick Actions</div>
+            </div>
+            <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:0;">
+                <a href="{% url 'core:director_hods' %}" class="stat-card quick-action-card" style="text-decoration:none;">
+                    <div class="stat-icon"><i data-lucide="users" style="width:22px;height:22px;"></i></div>
+                    <div>
+                        <div class="stat-label">Manage HODs</div>
+                    </div>
+                </a>
+                <a href="{% url 'core:director_add_hod' %}" class="stat-card quick-action-card" style="text-decoration:none;">
+                    <div class="stat-icon"><i data-lucide="user-plus" style="width:22px;height:22px;"></i></div>
+                    <div>
+                        <div class="stat-label">Add HOD</div>
+                    </div>
+                </a>
+                <a href="{% url 'core:admin_courses' %}" class="stat-card quick-action-card" style="text-decoration:none;">
+                    <div class="stat-icon"><i data-lucide="book-open" style="width:22px;height:22px;"></i></div>
+                    <div>
+                        <div class="stat-label">View Courses</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

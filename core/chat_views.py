@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django_ratelimit.decorators import ratelimit
 from .models import (
-    Student, Faculty, Course, Attendance, Result, Fee,
+    Student, Faculty, Director, HOD, Course, Attendance, Result, Fee,
     FacultyTeaching,
 )
 
@@ -56,7 +56,7 @@ def build_context(user):
     inst = user.institution
     ctx_parts = []
 
-    if user.role == 'admin':
+    if user.role == 'chairman':
         student_count = Student.objects.filter(institution=inst).count()
         faculty_count = Faculty.objects.filter(institution=inst).count()
         course_count = Course.objects.filter(institution=inst).count()
@@ -73,6 +73,12 @@ def build_context(user):
             f"{course_count} courses, {rate}% attendance rate, "
             f"Rs {collected:,} collected of Rs {total:,} total fees, "
             f"{failed} students with failing grades."
+        )
+
+    elif user.role in ('director', 'hod'):
+        ctx_parts.append(
+            f"You are an AI assistant for a {user.get_role_display()} at '{inst.name}'. "
+            f"You can help with department and course information."
         )
 
     elif user.role == 'student':

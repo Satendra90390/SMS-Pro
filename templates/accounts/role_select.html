@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}{% if step == '2' %}Choose Role{% else %}Verify Institution{% endif %} — Edosaic{% endblock %}
+{% block title %}Verify Institution — Edosaic{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/auth.css' %}?v=3">{% endblock %}
 {% block body %}
 <nav class="auth-nav">
@@ -22,12 +22,10 @@
             </div>
             {% endif %}
 
-            {% if step == '1' %}
-            <!-- STEP 1: Enter Invite Code -->
             <div class="auth-card-header" style="text-align:center;">
                 <div class="step-icon"><i data-lucide="key-round" style="width:28px;height:28px;"></i></div>
                 <h1>Verify Your Institution</h1>
-                <p class="subtitle">Enter the invite code provided by your institution admin.</p>
+                <p class="subtitle">Enter the invite code provided by your institution admin to join as a student.</p>
             </div>
 
             <form method="post" class="auth-form">
@@ -41,83 +39,8 @@
                     </div>
                     <span class="field-hint">Ask your institution admin for the invite code.</span>
                 </div>
-                <button type="submit" class="auth-submit">Verify <i data-lucide="check-circle" style="width:18px;height:18px;"></i></button>
+                <button type="submit" class="auth-submit">Verify & Join <i data-lucide="check-circle" style="width:18px;height:18px;"></i></button>
             </form>
-
-            {% elif step == '2' %}
-            <!-- STEP 2: Institution Confirmed → Pick Role -->
-            <div class="auth-card-header" style="text-align:center;">
-                <div class="step-icon step-icon-success"><i data-lucide="check-circle" style="width:28px;height:28px;"></i></div>
-                <h1>Institution Verified</h1>
-                <p class="subtitle">You're joining <strong>{{ institution.name }}</strong>. Now pick your role.</p>
-            </div>
-
-            <div class="inst-confirmed">
-                <div class="inst-confirmed-icon"><i data-lucide="building-2" style="width:20px;height:20px;"></i></div>
-                <div>
-                    <div class="inst-confirmed-name">{{ institution.name }}</div>
-                    <div class="inst-confirmed-type">{{ institution.inst_type }}</div>
-                </div>
-            </div>
-
-            <form method="post" class="auth-form" id="role-form">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="pick_role">
-                <input type="hidden" name="role" id="selected-role" value="">
-
-                <div class="role-grid">
-                    <label class="role-card" onclick="selectRole('student')">
-                        <div class="role-card-inner" data-role="student">
-                            <div class="role-icon"><i data-lucide="graduation-cap" style="width:28px;height:28px;"></i></div>
-                            <strong>Student</strong>
-                            <span>Access courses & results</span>
-                        </div>
-                    </label>
-                    <label class="role-card" onclick="selectRole('faculty')">
-                        <div class="role-card-inner" data-role="faculty">
-                            <div class="role-icon"><i data-lucide="book-open" style="width:28px;height:28px;"></i></div>
-                            <strong>Faculty</strong>
-                            <span>Teach & manage students</span>
-                        </div>
-                    </label>
-                    <label class="role-card" onclick="selectRole('parent')">
-                        <div class="role-card-inner" data-role="parent">
-                            <div class="role-icon"><i data-lucide="heart" style="width:28px;height:28px;"></i></div>
-                            <strong>Parent</strong>
-                            <span>Monitor your child's progress</span>
-                        </div>
-                    </label>
-                    <label class="role-card" onclick="selectRole('accountant')">
-                        <div class="role-card-inner" data-role="accountant">
-                            <div class="role-icon"><i data-lucide="wallet" style="width:28px;height:28px;"></i></div>
-                            <strong>Accountant</strong>
-                            <span>Manage fees & payments</span>
-                        </div>
-                    </label>
-                    <label class="role-card" onclick="selectRole('librarian')">
-                        <div class="role-card-inner" data-role="librarian">
-                            <div class="role-icon"><i data-lucide="library" style="width:28px;height:28px;"></i></div>
-                            <strong>Librarian</strong>
-                            <span>Manage library books</span>
-                        </div>
-                    </label>
-                </div>
-
-                <div style="display:flex;gap:10px;margin-top:24px;">
-                    <form method="post" style="flex:0;">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="back">
-                        <button type="submit" class="auth-submit" style="background:var(--bg-secondary);border:1.5px solid var(--border-default);color:var(--text-secondary);padding:12px 20px;">
-                            <i data-lucide="arrow-left" style="width:18px;height:18px;"></i> Back
-                        </button>
-                    </form>
-                    <button type="submit" class="auth-submit" style="flex:1;" id="submit-btn" disabled>
-                        Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
-                    </button>
-                </div>
-            </form>
-
-            {% endif %}
         </div>
     </div>
 </div>
@@ -133,79 +56,10 @@
     margin: 0 auto 20px;
     box-shadow: 0 4px 20px var(--brand-glow);
 }
-.step-icon-success {
-    background: rgba(34,197,94,0.1);
-    color: #22c55e;
-    box-shadow: 0 4px 20px rgba(34,197,94,0.2);
-}
 .field-hint { display: block; font-size: 11px; color: var(--text-tertiary); margin-top: 6px; }
-
-.inst-confirmed {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-    background: rgba(34,197,94,0.06);
-    border: 1px solid rgba(34,197,94,0.2);
-    border-radius: 12px;
-    margin-bottom: 24px;
-}
-.inst-confirmed-icon {
-    width: 40px; height: 40px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 10px;
-    background: rgba(34,197,94,0.1);
-    color: #22c55e;
-    flex-shrink: 0;
-}
-.inst-confirmed-name { font-weight: 600; font-size: 15px; color: var(--text-primary); }
-.inst-confirmed-type { font-size: 12px; color: var(--text-tertiary); }
-
-.role-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-.role-card { cursor: pointer; }
-.role-card-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    padding: 20px 12px;
-    border: 2px solid var(--border-default);
-    border-radius: 14px;
-    background: var(--bg-secondary);
-    transition: all .2s ease;
-    text-align: center;
-}
-.role-card-inner.selected,
-.role-card-inner:hover {
-    border-color: var(--brand-400);
-    background: var(--brand-bg);
-    box-shadow: 0 0 0 3px var(--brand-glow);
-    transform: translateY(-2px);
-}
-.role-icon {
-    width: 48px; height: 48px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 12px;
-    background: var(--brand-bg);
-    color: var(--brand-text);
-}
-.role-card-inner strong { font-size: 14px; color: var(--text-primary); }
-.role-card-inner span { font-size: 12px; color: var(--text-tertiary); }
 </style>
 
 <script>
-function selectRole(role) {
-    document.getElementById('selected-role').value = role;
-    document.querySelectorAll('.role-card-inner').forEach(function(el) {
-        el.classList.remove('selected');
-    });
-    event.currentTarget.querySelector('.role-card-inner').classList.add('selected');
-    document.getElementById('submit-btn').disabled = false;
-}
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof lucide !== 'undefined') lucide.createIcons();
 });

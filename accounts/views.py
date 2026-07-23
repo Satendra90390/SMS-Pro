@@ -5,7 +5,7 @@ from django.contrib import messages
 from django_ratelimit.decorators import ratelimit
 from sms_django.turnstile import verify_turnstile
 from .models import User
-from core.models import Institution, Student, Faculty, Parent
+from core.models import Institution, Chairman, Director, HOD, Student, Faculty
 from django.db import transaction
 from django.http import JsonResponse
 
@@ -85,51 +85,22 @@ def role_select(request):
             except Institution.DoesNotExist:
                 messages.error(request, 'Invalid invite code. Please check with your admin.')
                 return render(request, 'accounts/role_select.html', {'step': '1'})
-            request.session['role_select_step'] = '2'
-            request.session['role_select_inst_id'] = institution.id
-            return render(request, 'accounts/role_select.html', {
-                'step': '2', 'institution': institution,
-            })
-
-        if action == 'pick_role':
-            role = request.POST.get('role', '').strip()
-            if role == 'admin':
-                request.session.pop('role_select_step', None)
-                request.session.pop('role_select_inst_id', None)
-                return redirect('accounts:register')
-
-            if role not in ['accountant', 'faculty', 'student', 'parent', 'librarian']:
-                messages.error(request, 'Please select a valid role.')
-                institution = get_object_or_404(Institution, pk=inst_id)
-                return render(request, 'accounts/role_select.html', {
-                    'step': '2', 'institution': institution,
-                })
-
-            institution = get_object_or_404(Institution, pk=inst_id)
-            user.role = role
+            user.role = 'student'
             user.institution = institution
             user.save()
-
-            if role == 'student':
-                Student.objects.get_or_create(user=user, institution=institution, defaults={'name': user.get_full_name() or user.username, 'age': 18, 'sex': 'Other', 'phone': user.phone or ''})
-            elif role == 'faculty':
-                Faculty.objects.get_or_create(user=user, institution=institution, defaults={'name': user.get_full_name() or user.username, 'department': '', 'phone': user.phone or '', 'qualification': ''})
-
+            Student.objects.get_or_create(
+                user=user, institution=institution,
+                defaults={'name': user.get_full_name() or user.username, 'age': 18, 'sex': 'Other', 'phone': user.phone or ''},
+            )
             request.session.pop('role_select_step', None)
             request.session.pop('role_select_inst_id', None)
-            messages.success(request, f'Welcome! You are registered as {role.title()} at {institution.name}.')
+            messages.success(request, f'Welcome! You are registered as a Student at {institution.name}.')
             return redirect('core:dashboard')
 
         if action == 'back':
-            request.session['role_select_step'] = '1'
+            request.session.pop('role_select_step', None)
             request.session.pop('role_select_inst_id', None)
-            return render(request, 'accounts/role_select.html', {'step': '1'})
-
-    if step == '2' and inst_id:
-        institution = get_object_or_404(Institution, pk=inst_id)
-        return render(request, 'accounts/role_select.html', {
-            'step': '2', 'institution': institution,
-        })
+            return redirect('accounts:login')
 
     return render(request, 'accounts/role_select.html', {'step': '1'})
 
@@ -193,9 +164,13 @@ def register_institution(request):
             name=inst_name, slug=slug, inst_type=inst_type,
             phone=inst_phone, email=inst_email, address=inst_address,
         )
-        User.objects.create_user(
+        admin_user = User.objects.create_user(
             username=admin_username, password=admin_password,
-            role='admin', institution=inst, first_name=admin_name,
+            role='chairman', institution=inst, first_name=admin_name,
+        )
+        Chairman.objects.create(
+            institution=inst, user=admin_user, name=admin_name,
+            phone=inst_phone, email=inst_email,
         )
         messages.success(request, 'Institution registered! You can now log in.')
         return redirect('accounts:login')
@@ -210,8 +185,12 @@ def profile_view(request):
         profile_data = user.student_profile
     elif hasattr(user, 'faculty_profile'):
         profile_data = user.faculty_profile
-    elif hasattr(user, 'parent_profile'):
-        profile_data = user.parent_profile
+    elif hasattr(user, 'chairman_profile'):
+        profile_data = user.chairman_profile
+    elif hasattr(user, 'director_profile'):
+        profile_data = user.director_profile
+    elif hasattr(user, 'hod_profile'):
+        profile_data = user.hod_profile
 
     if request.method == 'POST':
         confirm = request.POST.get('confirm_username', '')
@@ -221,7 +200,9 @@ def profile_view(request):
         with transaction.atomic():
             Student.objects.filter(user=user).update(user=None)
             Faculty.objects.filter(user=user).update(user=None)
-            Parent.objects.filter(user=user).update(user=None)
+            Chairman.objects.filter(user=user).update(user=None)
+            Director.objects.filter(user=user).update(user=None)
+            HOD.objects.filter(user=user).update(user=None)
             user.delete()
         logout(request)
         messages.success(request, 'Your account has been permanently deleted.')
@@ -266,12 +247,7 @@ def self_register(request):
             except Institution.DoesNotExist:
                 messages.error(request, 'Institution not found.')
                 return render(request, 'accounts/self_register.html', {'step': '1'})
-            if role not in ['student', 'faculty', 'parent', 'accountant', 'librarian']:
-                messages.error(request, 'Please select a valid role.')
-                return render(request, 'accounts/self_register.html', {
-                    'step': '2', 'institution': institution,
-                    'inst_id': inst_id, 'invite_code': invite_code,
-                })
+            role = 'student'
             return render(request, 'accounts/self_register.html', {
                 'step': '3', 'institution': institution,
                 'inst_id': inst_id, 'invite_code': invite_code,
@@ -292,8 +268,8 @@ def self_register(request):
                 institution = Institution.objects.get(pk=inst_id, is_active=True)
             except Institution.DoesNotExist:
                 messages.error(request, 'Institution not found.')
-                return render(request, 'accounts/self_register.html', {'step': '1'})
-            if role not in ['student', 'faculty', 'parent', 'accountant', 'librarian']:
+                return redirect('accounts:self_register')
+            if role != 'student':
                 messages.error(request, 'Invalid role.')
                 return redirect('accounts:self_register')
             if not full_name:
@@ -360,21 +336,24 @@ def self_register(request):
                     name=full_name, department=department,
                     phone=phone, qualification=qualification, email=email,
                 )
-            elif role == 'parent':
+            elif role == 'director':
+                department = request.POST.get('department', '').strip()
+                qualification = request.POST.get('qualification', '').strip()
                 email = request.POST.get('email', '').strip()
-                relationship = request.POST.get('relationship', '').strip()
-                child_name = request.POST.get('child_name', '').strip()
-                child = None
-                if child_name:
-                    child = Student.objects.filter(
-                        institution=institution, name__icontains=child_name
-                    ).first()
-                if child:
-                    Parent.objects.create(
-                        institution=institution, user=user,
-                        name=full_name, phone=phone, email=email,
-                        relationship=relationship, child=child,
-                    )
+                Director.objects.create(
+                    institution=institution, user=user,
+                    name=full_name, department=department,
+                    phone=phone, qualification=qualification, email=email,
+                )
+            elif role == 'hod':
+                department = request.POST.get('department', '').strip()
+                qualification = request.POST.get('qualification', '').strip()
+                email = request.POST.get('email', '').strip()
+                HOD.objects.create(
+                    institution=institution, user=user,
+                    name=full_name, department=department,
+                    phone=phone, qualification=qualification, email=email,
+                )
 
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, f'Welcome to {institution.name}, {full_name}!')

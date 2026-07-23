@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Students - Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/faculty_sidebar.html' with active='students' %}
+
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>My Students</h1>
+                <div class="subtitle">Students enrolled in your courses</div>
+            </div>
+        </div>
+
+        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="graduation-cap" style="width:22px;height:22px;"></i></div>
+                <div>
+                    <div class="stat-value">{{ students|length }}</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="book-open" style="width:22px;height:22px;"></i></div>
+                <div>
+                    <div class="stat-value">{{ teachings|length }}</div>
+                    <div class="stat-label">My Courses</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i data-lucide="building-2" style="width:22px;height:22px;"></i></div>
+                <div>
+                    <div class="stat-value">{% if faculty_obj %}{{ faculty_obj.department|default:"-" }}{% else %}-{% endif %}</div>
+                    <div class="stat-label">Department</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-header" style="margin-bottom:8px;">
+            <form method="get" class="search-form" style="display:flex;gap:8px;flex:1;max-width:400px;">
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search students..." style="flex:1;">
+                <button type="submit" class="btn btn-primary btn-sm"><i data-lucide="search" style="width:16px;height:16px;"></i></button>
+            </form>
+            <a href="{% url 'core:faculty_add_student' %}" class="btn btn-primary"><i data-lucide="user-plus" style="width:16px;height:16px;"></i> Add Student</a>
+        </div>
+
+        <div class="card">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Course</th>
+                            <th>Year</th>
+                            <th>Semester</th>
+                            <th>Phone</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td class="td-name">
+                                <div class="user-cell">
+                                    <div class="avatar avatar-sm">{{ student.user.username.0|upper }}</div>
+                                    {{ student.user.get_full_name|default:student.user.username }}
+                                </div>
+                            </td>
+                            <td>{{ student.course.name|default:"-" }}</td>
+                            <td><span class="badge badge-blue">{{ student.year|default:"-" }}</span></td>
+                            <td><span class="badge badge-purple">{{ student.semester|default:"-" }}</span></td>
+                            <td>{{ student.phone|default:"-" }}</td>
+                            <td>
+                                <form method="post" action="{% url 'core:faculty_students' %}?delete={{ student.pk }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to remove this student?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state"><div class="icon"><i data-lucide="graduation-cap" style="width:48px;height:48px;"></i></div><h3>No students found</h3></div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

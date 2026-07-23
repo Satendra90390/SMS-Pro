@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Add Librarian - Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/hod_sidebar.html' with active='add_librarian' %}
+
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Add New Librarian</h1>
+                <div class="subtitle">Register a new librarian into the system</div>
+            </div>
+        </div>
+
+        <div class="card" style="max-width:720px;">
+            <div class="card-header">
+                <div class="card-title"><span class="dot" style="background:#34d399;"></span> Librarian Information</div>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" name="name" placeholder="e.g. Meena Gupta" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="text" name="phone" placeholder="+91 98765 43210" required>
+                    </div>
+                </div>
+                <div class="form-divider">Login Credentials</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" name="username" placeholder="Choose a username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" name="password" placeholder="Min 6 characters" required>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary"><i data-lucide="check" style="width:16px;height:16px;"></i> Add Librarian</button>
+                    <a href="{% url 'core:hod_librarians' %}" class="btn btn-secondary"><i data-lucide="arrow-left" style="width:16px;height:16px;"></i> Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+{% endblock %}

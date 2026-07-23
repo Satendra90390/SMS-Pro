@@ -84,18 +84,13 @@
             </div>
 
             <div class="step-indicator">
-                <div class="step {% if step == '1' or not step %}active{% elif step == '2' or step == '3' %}completed{% endif %}" id="step1-ind">
-                    <div class="step-num">{% if step == '2' or step == '3' %}&#10003;{% else %}1{% endif %}</div>
+                <div class="step {% if step == '1' or not step %}active{% elif step == '3' %}completed{% endif %}" id="step1-ind">
+                    <div class="step-num">{% if step == '3' %}&#10003;{% else %}1{% endif %}</div>
                     <span>Code</span>
                 </div>
                 <div class="step-line"></div>
-                <div class="step {% if step == '2' %}active{% elif step == '3' %}completed{% endif %}" id="step2-ind">
-                    <div class="step-num">{% if step == '3' %}&#10003;{% else %}2{% endif %}</div>
-                    <span>Role</span>
-                </div>
-                <div class="step-line"></div>
                 <div class="step {% if step == '3' %}active{% endif %}" id="step3-ind">
-                    <div class="step-num">3</div>
+                    <div class="step-num">2</div>
                     <span>Account</span>
                 </div>
             </div>
@@ -137,85 +132,11 @@
                 </div>
 
                 {% elif step == '2' %}
-                <input type="hidden" name="step" value="2">
-                <input type="hidden" name="invite_code" value="{{ invite_code }}">
-                <input type="hidden" name="inst_id" value="{{ inst_id }}">
-                <div id="signup-step2">
-                    <div class="form-section">
-                        <div class="form-section-title">
-                            <div class="section-icon"><i data-lucide="building-2" style="width:22px;height:22px;"></i></div>
-                            {{ institution.name }}
-                        </div>
-                    </div>
-
-                    <div style="background:var(--accent-bg,#eef2ff);border:1px solid var(--accent-border,#c7d2fe);border-radius:var(--r-md);padding:12px 16px;margin-bottom:16px;">
-                        <div style="font-size:13px;color:var(--accent-text,#4f46e5);font-weight:500;">
-                            <i data-lucide="check-circle" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"></i>
-                            Institution verified — {{ institution.inst_type }}
-                        </div>
-                    </div>
-
-                    <div class="form-section" style="margin-top:0;">
-                        <div class="form-section-title">
-                            <div class="section-icon"><i data-lucide="users" style="width:22px;height:22px;"></i></div>
-                            Select Your Role
-                        </div>
-                    </div>
-
-                    <div class="role-grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-                        <label class="role-card">
-                            <input type="radio" name="role" value="student" {% if role == 'student' %}checked{% endif %} required>
-                            <div class="role-card-inner">
-                                <div class="role-icon"><i data-lucide="graduation-cap" style="width:24px;height:24px;"></i></div>
-                                <strong>Student</strong>
-                                <span>Access courses & results</span>
-                            </div>
-                        </label>
-                        <label class="role-card">
-                            <input type="radio" name="role" value="faculty" {% if role == 'faculty' %}checked{% endif %}>
-                            <div class="role-card-inner">
-                                <div class="role-icon"><i data-lucide="book-open" style="width:24px;height:24px;"></i></div>
-                                <strong>Faculty</strong>
-                                <span>Teach & manage classes</span>
-                            </div>
-                        </label>
-                        <label class="role-card">
-                            <input type="radio" name="role" value="parent" {% if role == 'parent' %}checked{% endif %}>
-                            <div class="role-card-inner">
-                                <div class="role-icon"><i data-lucide="heart" style="width:24px;height:24px;"></i></div>
-                                <strong>Parent</strong>
-                                <span>Monitor your child</span>
-                            </div>
-                        </label>
-                        <label class="role-card">
-                            <input type="radio" name="role" value="accountant" {% if role == 'accountant' %}checked{% endif %}>
-                            <div class="role-card-inner">
-                                <div class="role-icon"><i data-lucide="wallet" style="width:24px;height:24px;"></i></div>
-                                <strong>Accountant</strong>
-                                <span>Manage fees & payments</span>
-                            </div>
-                        </label>
-                        <label class="role-card" style="grid-column:1/-1;">
-                            <input type="radio" name="role" value="librarian" {% if role == 'librarian' %}checked{% endif %}>
-                            <div class="role-card-inner">
-                                <div class="role-icon"><i data-lucide="library" style="width:24px;height:24px;"></i></div>
-                                <strong>Librarian</strong>
-                                <span>Manage library books & issues</span>
-                            </div>
-                        </label>
-                    </div>
-
-                    <button type="submit" class="auth-submit">
-                        Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
-                    </button>
-                </div>
-
-                {% elif step == '3' %}
                 <input type="hidden" name="step" value="3">
                 <input type="hidden" name="invite_code" value="{{ invite_code }}">
                 <input type="hidden" name="inst_id" value="{{ inst_id }}">
                 <input type="hidden" name="role" value="{{ role }}">
-                <div id="signup-step3">
+                <div id="signup-step2">
                     <div class="form-section">
                         <div class="form-section-title">
                             <div class="section-icon"><i data-lucide="building-2" style="width:22px;height:22px;"></i></div>
@@ -277,7 +198,7 @@
                         </div>
                     </div>
 
-                    <div id="student-fields" style="display:none;">
+                    <div id="student-fields">
                         <div class="form-section" style="margin-top:0;">
                             <div class="form-section-title">
                                 <div class="section-icon"><i data-lucide="graduation-cap" style="width:22px;height:22px;"></i></div>
@@ -298,74 +219,6 @@
                                 </select>
                             </div>
                         </div>
-                    </div>
-
-                    <div id="faculty-fields" style="display:none;">
-                        <div class="form-section" style="margin-top:0;">
-                            <div class="form-section-title">
-                                <div class="section-icon"><i data-lucide="book-open" style="width:22px;height:22px;"></i></div>
-                                Faculty Details
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Department</label>
-                            <div class="input-wrap">
-                                <input type="text" name="department" placeholder="e.g. Computer Science">
-                                <span class="input-icon"><i data-lucide="building" style="width:18px;height:18px;"></i></span>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Qualification</label>
-                            <div class="input-wrap">
-                                <input type="text" name="qualification" placeholder="e.g. Ph.D, M.Tech, M.Sc">
-                                <span class="input-icon"><i data-lucide="award" style="width:18px;height:18px;"></i></span>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <div class="input-wrap">
-                                <input type="email" name="email" placeholder="you@institution.edu">
-                                <span class="input-icon"><i data-lucide="mail" style="width:18px;height:18px;"></i></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="parent-fields" style="display:none;">
-                        <div class="form-section" style="margin-top:0;">
-                            <div class="form-section-title">
-                                <div class="section-icon"><i data-lucide="heart" style="width:22px;height:22px;"></i></div>
-                                Parent Details
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Relationship</label>
-                            <div class="input-wrap">
-                                <input type="text" name="relationship" placeholder="e.g. Father, Mother, Guardian">
-                                <span class="input-icon"><i data-lucide="heart" style="width:18px;height:18px;"></i></span>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Child's Name</label>
-                            <div class="input-wrap">
-                                <input type="text" name="child_name" placeholder="Student name at this institution">
-                                <span class="input-icon"><i data-lucide="graduation-cap" style="width:18px;height:18px;"></i></span>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <div class="input-wrap">
-                                <input type="email" name="email" placeholder="you@email.com">
-                                <span class="input-icon"><i data-lucide="mail" style="width:18px;height:18px;"></i></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="accountant-fields" style="display:none;">
-                        <p style="font-size:12px;color:var(--text-tertiary);margin-top:4px;">Accountant role gives you access to fee management only.</p>
-                    </div>
-
-                    <div id="librarian-fields" style="display:none;">
-                        <p style="font-size:12px;color:var(--text-tertiary);margin-top:4px;">Librarian role gives you access to library management only.</p>
                     </div>
 
                     <div style="display:flex;gap:10px;margin-top:16px;align-items:center;">
@@ -439,14 +292,6 @@ function checkStrength(pw) {
 
 document.addEventListener('DOMContentLoaded', function() {
     lucide.createIcons();
-    {% if step == '3' %}
-    var role = '{{ role }}';
-    if (role === 'student') document.getElementById('student-fields').style.display = 'block';
-    else if (role === 'faculty') document.getElementById('faculty-fields').style.display = 'block';
-    else if (role === 'parent') document.getElementById('parent-fields').style.display = 'block';
-    else if (role === 'accountant') document.getElementById('accountant-fields').style.display = 'block';
-    else if (role === 'librarian') document.getElementById('librarian-fields').style.display = 'block';
-    {% endif %}
 });
 </script>
 {% endblock %}

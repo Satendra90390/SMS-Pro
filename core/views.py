@@ -4,8 +4,8 @@ from django.contrib import messages
 from django.db.models import Count, Sum, Q
 from datetime import date, timedelta
 from .models import (
-    Institution, Student, Faculty, Course, Branch, Subject, FacultyTeaching,
-    StudentCourse, Result, Attendance, Fee, Parent, AuditLog,
+    Institution, Chairman, Director, HOD, Student, Faculty, Course, Branch, Subject, FacultyTeaching,
+    StudentCourse, Result, Attendance, Fee, AuditLog,
     Exam, ExamResult, Book, BookIssue, BookFine, Event,
 )
 from accounts.models import User
@@ -22,8 +22,12 @@ def log_audit(user, action, details="", collection=""):
 @login_required
 def dashboard_router(request):
     role = request.user.role
-    if role == 'admin':
-        return redirect('core:admin_dashboard')
+    if role == 'chairman':
+        return redirect('core:chairman_dashboard')
+    elif role == 'director':
+        return redirect('core:director_dashboard')
+    elif role == 'hod':
+        return redirect('core:hod_dashboard')
     elif role == 'accountant':
         return redirect('core:accountant_dashboard')
     elif role == 'librarian':
@@ -32,19 +36,19 @@ def dashboard_router(request):
         return redirect('core:faculty_dashboard')
     elif role == 'student':
         return redirect('core:student_dashboard')
-    elif role == 'parent':
-        return redirect('core:parent_dashboard')
     return redirect('accounts:login')
 
 
 @login_required
 def admin_dashboard(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     ctx = {
         'student_count': Student.objects.filter(institution=inst).count(),
         'faculty_count': Faculty.objects.filter(institution=inst).count(),
+        'director_count': Director.objects.filter(institution=inst).count(),
+        'hod_count': HOD.objects.filter(institution=inst).count(),
         'total_attendance': Attendance.objects.filter(institution=inst).count(),
         'present_count': Attendance.objects.filter(institution=inst, status='Present').count(),
         'absent_count': Attendance.objects.filter(institution=inst, status='Absent').count(),
@@ -60,7 +64,7 @@ def admin_dashboard(request):
 
 @login_required
 def admin_students(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     students = Student.objects.filter(institution=inst).order_by('name')
@@ -83,7 +87,7 @@ def admin_students(request):
 
 @login_required
 def admin_add_student(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     if request.method == 'POST':
@@ -125,7 +129,7 @@ def admin_add_student(request):
 
 @login_required
 def admin_faculty(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     faculty_list = Faculty.objects.filter(institution=inst).order_by('name')
@@ -134,7 +138,7 @@ def admin_faculty(request):
 
 @login_required
 def admin_add_faculty(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     if request.method == 'POST':
@@ -167,7 +171,7 @@ def admin_add_faculty(request):
 
 @login_required
 def admin_subjects(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     courses = Course.objects.filter(institution=inst)
@@ -179,7 +183,7 @@ def admin_subjects(request):
 
 @login_required
 def admin_courses(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     courses = Course.objects.filter(institution=inst).order_by('name')
@@ -201,7 +205,7 @@ def admin_courses(request):
 
 @login_required
 def admin_add_course(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     if request.method == 'POST':
@@ -227,7 +231,7 @@ def admin_add_course(request):
 
 @login_required
 def admin_branches(request, course_id):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     course = get_object_or_404(Course, pk=course_id, institution=inst)
@@ -247,7 +251,7 @@ def admin_branches(request, course_id):
 
 @login_required
 def admin_add_branch(request, course_id):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     course = get_object_or_404(Course, pk=course_id, institution=inst)
@@ -266,7 +270,7 @@ def admin_add_branch(request, course_id):
 
 @login_required
 def admin_subjects_manage(request, course_id, branch_id=None):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     course = get_object_or_404(Course, pk=course_id, institution=inst)
@@ -299,7 +303,7 @@ def admin_subjects_manage(request, course_id, branch_id=None):
 
 @login_required
 def admin_add_subject(request, course_id, branch_id=None):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     course = get_object_or_404(Course, pk=course_id, institution=inst)
@@ -332,7 +336,7 @@ def admin_add_subject(request, course_id, branch_id=None):
 
 @login_required
 def admin_reports(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     results = Result.objects.filter(institution=inst).select_related('student', 'faculty', 'course')[:100]
@@ -341,7 +345,7 @@ def admin_reports(request):
 
 @login_required
 def admin_fees(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     fees = Fee.objects.filter(institution=inst).select_related('student')
@@ -353,7 +357,7 @@ def admin_fees(request):
 
 @login_required
 def admin_analytics(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     total = Attendance.objects.filter(institution=inst).count()
@@ -402,15 +406,442 @@ def student_dashboard(request):
 
 
 @login_required
-def parent_dashboard(request):
-    if request.user.role != 'parent':
+def director_dashboard(request):
+    if request.user.role != 'director':
         return redirect('core:dashboard')
     inst = request.user.institution
     try:
-        parent_obj = Parent.objects.get(user=request.user, institution=inst)
-    except Parent.DoesNotExist:
-        parent_obj = None
-    return render(request, 'parent/dashboard.html', {'parent_obj': parent_obj})
+        director_obj = Director.objects.get(user=request.user, institution=inst)
+    except Director.DoesNotExist:
+        director_obj = None
+    courses = director_obj.courses.all() if director_obj else Course.objects.none()
+    faculty_list = Faculty.objects.filter(institution=inst, courses__in=courses).distinct() if director_obj else []
+    student_count = Student.objects.filter(institution=inst, course__in=courses).count() if director_obj else 0
+    return render(request, 'director/dashboard.html', {
+        'director_obj': director_obj, 'courses': courses,
+        'faculty_list': faculty_list, 'student_count': student_count,
+    })
+
+
+@login_required
+def hod_dashboard(request):
+    if request.user.role != 'hod':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    try:
+        hod_obj = HOD.objects.get(user=request.user, institution=inst)
+    except HOD.DoesNotExist:
+        hod_obj = None
+    courses = hod_obj.courses.all() if hod_obj else Course.objects.none()
+    department = hod_obj.department if hod_obj else ''
+    faculty_list = Faculty.objects.filter(institution=inst, department=department) if department else []
+    student_count = Student.objects.filter(institution=inst, course__in=courses, department__iexact=department).count() if hod_obj else 0
+    return render(request, 'hod/dashboard.html', {
+        'hod_obj': hod_obj, 'courses': courses,
+        'faculty_list': faculty_list, 'student_count': student_count,
+    })
+
+
+# ─── CHAIRMAN: MANAGE DIRECTORS ──────────────────────────────
+
+@login_required
+def chairman_directors(request):
+    if request.user.role != 'chairman':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    directors = Director.objects.filter(institution=inst).order_by('name')
+    q = request.GET.get('q', '').strip()
+    if q:
+        directors = directors.filter(Q(name__icontains=q) | Q(department__icontains=q))
+    if request.method == 'POST' and request.POST.get('delete_id'):
+        did = request.POST.get('delete_id')
+        try:
+            d = Director.objects.get(pk=did, institution=inst)
+            log_audit(request.user, 'delete_director', f"Deleted director {d.name}", 'director_details')
+            d.delete()
+            messages.success(request, f'Director "{d.name}" deleted.')
+        except Director.DoesNotExist:
+            messages.error(request, 'Director not found.')
+        return redirect('core:chairman_directors')
+    return render(request, 'chairman/directors.html', {'directors': directors, 'q': q})
+
+
+@login_required
+def chairman_add_director(request):
+    if request.user.role != 'chairman':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    courses = Course.objects.filter(institution=inst).order_by('name')
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        department = request.POST.get('department', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        qualification = request.POST.get('qualification', '').strip()
+        email = request.POST.get('email', '').strip()
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        course_ids = request.POST.getlist('courses')
+
+        errors = []
+        if not name:
+            errors.append('Name is required.')
+        if not username:
+            errors.append('Username is required.')
+        if User.objects.filter(username=username).exists():
+            errors.append('Username already taken.')
+        if len(password) < 6:
+            errors.append('Password must be at least 6 characters.')
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+            return render(request, 'chairman/add_director.html', {'courses': courses})
+
+        user = User.objects.create_user(
+            username=username, password=password,
+            role='director', institution=inst, first_name=name, phone=phone,
+        )
+        director = Director.objects.create(
+            institution=inst, user=user, name=name,
+            department=department, phone=phone, qualification=qualification, email=email,
+        )
+        if course_ids:
+            director.courses.set(Course.objects.filter(pk__in=course_ids, institution=inst))
+        log_audit(request.user, 'add_director', f"Added director {name}", 'director_details')
+        messages.success(request, f'Director "{name}" added successfully.')
+        return redirect('core:chairman_directors')
+    return render(request, 'chairman/add_director.html', {'courses': courses})
+
+
+# ─── CHAIRMAN: MANAGE ACCOUNTANTS ────────────────────────────
+
+@login_required
+def chairman_accountants(request):
+    if request.user.role != 'chairman':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    accountants = User.objects.filter(institution=inst, role='accountant').order_by('username')
+    return render(request, 'chairman/accountants.html', {'accountants': accountants})
+
+
+@login_required
+def chairman_add_accountant(request):
+    if request.user.role != 'chairman':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+
+        errors = []
+        if not name:
+            errors.append('Name is required.')
+        if not username:
+            errors.append('Username is required.')
+        if User.objects.filter(username=username).exists():
+            errors.append('Username already taken.')
+        if len(password) < 6:
+            errors.append('Password must be at least 6 characters.')
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+            return render(request, 'chairman/add_accountant.html')
+
+        User.objects.create_user(
+            username=username, password=password,
+            role='accountant', institution=inst, first_name=name, phone=phone,
+        )
+        log_audit(request.user, 'add_accountant', f"Added accountant {name}", 'users')
+        messages.success(request, f'Accountant "{name}" added successfully.')
+        return redirect('core:chairman_accountants')
+    return render(request, 'chairman/add_accountant.html')
+
+
+# ─── DIRECTOR: MANAGE HODS ───────────────────────────────────
+
+@login_required
+def director_hods(request):
+    if request.user.role != 'director':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    try:
+        director_obj = Director.objects.get(user=request.user, institution=inst)
+    except Director.DoesNotExist:
+        director_obj = None
+    my_course_ids = director_obj.courses.values_list('id', flat=True) if director_obj else []
+    hods = HOD.objects.filter(institution=inst, courses__id__in=my_course_ids).distinct().order_by('name')
+    q = request.GET.get('q', '').strip()
+    if q:
+        hods = hods.filter(Q(name__icontains=q) | Q(department__icontains=q))
+    if request.method == 'POST' and request.POST.get('delete_id'):
+        hid = request.POST.get('delete_id')
+        try:
+            h = HOD.objects.get(pk=hid, institution=inst)
+            log_audit(request.user, 'delete_hod', f"Deleted HOD {h.name}", 'hod_details')
+            h.delete()
+            messages.success(request, f'HOD "{h.name}" deleted.')
+        except HOD.DoesNotExist:
+            messages.error(request, 'HOD not found.')
+        return redirect('core:director_hods')
+    return render(request, 'director/hods.html', {'hods': hods, 'q': q, 'director_obj': director_obj})
+
+
+@login_required
+def director_add_hod(request):
+    if request.user.role != 'director':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    try:
+        director_obj = Director.objects.get(user=request.user, institution=inst)
+    except Director.DoesNotExist:
+        return redirect('core:dashboard')
+    courses = director_obj.courses.all().order_by('name')
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        department = request.POST.get('department', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        qualification = request.POST.get('qualification', '').strip()
+        email = request.POST.get('email', '').strip()
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        course_ids = request.POST.getlist('courses')
+
+        errors = []
+        if not name:
+            errors.append('Name is required.')
+        if not department:
+            errors.append('Department is required.')
+        if not username:
+            errors.append('Username is required.')
+        if User.objects.filter(username=username).exists():
+            errors.append('Username already taken.')
+        if len(password) < 6:
+            errors.append('Password must be at least 6 characters.')
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+            return render(request, 'director/add_hod.html', {'courses': courses})
+
+        user = User.objects.create_user(
+            username=username, password=password,
+            role='hod', institution=inst, first_name=name, phone=phone,
+        )
+        hod = HOD.objects.create(
+            institution=inst, user=user, name=name,
+            department=department, phone=phone, qualification=qualification, email=email,
+        )
+        if course_ids:
+            hod.courses.set(Course.objects.filter(pk__in=course_ids, institution=inst))
+        log_audit(request.user, 'add_hod', f"Added HOD {name}", 'hod_details')
+        messages.success(request, f'HOD "{name}" added successfully.')
+        return redirect('core:director_hods')
+    return render(request, 'director/add_hod.html', {'courses': courses})
+
+
+# ─── HOD: MANAGE FACULTY ─────────────────────────────────────
+
+@login_required
+def hod_faculty(request):
+    if request.user.role != 'hod':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    try:
+        hod_obj = HOD.objects.get(user=request.user, institution=inst)
+    except HOD.DoesNotExist:
+        return redirect('core:dashboard')
+    faculty_list = Faculty.objects.filter(institution=inst, department=hod_obj.department).order_by('name')
+    q = request.GET.get('q', '').strip()
+    if q:
+        faculty_list = faculty_list.filter(Q(name__icontains=q) | Q(qualification__icontains=q))
+    if request.method == 'POST' and request.POST.get('delete_id'):
+        fid = request.POST.get('delete_id')
+        try:
+            f = Faculty.objects.get(pk=fid, institution=inst, department=hod_obj.department)
+            log_audit(request.user, 'delete_faculty', f"Deleted faculty {f.name}", 'faculty_details')
+            f.delete()
+            messages.success(request, f'Faculty "{f.name}" deleted.')
+        except Faculty.DoesNotExist:
+            messages.error(request, 'Faculty not found.')
+        return redirect('core:hod_faculty')
+    return render(request, 'hod/faculty.html', {'faculty_list': faculty_list, 'q': q, 'hod_obj': hod_obj})
+
+
+@login_required
+def hod_add_faculty(request):
+    if request.user.role != 'hod':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    try:
+        hod_obj = HOD.objects.get(user=request.user, institution=inst)
+    except HOD.DoesNotExist:
+        return redirect('core:dashboard')
+    courses = hod_obj.courses.all().order_by('name')
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        qualification = request.POST.get('qualification', '').strip()
+        email = request.POST.get('email', '').strip()
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        course_ids = request.POST.getlist('courses')
+
+        errors = []
+        if not name:
+            errors.append('Name is required.')
+        if not username:
+            errors.append('Username is required.')
+        if User.objects.filter(username=username).exists():
+            errors.append('Username already taken.')
+        if len(password) < 6:
+            errors.append('Password must be at least 6 characters.')
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+            return render(request, 'hod/add_faculty.html', {'courses': courses})
+
+        user = User.objects.create_user(
+            username=username, password=password,
+            role='faculty', institution=inst, first_name=name, phone=phone,
+        )
+        faculty = Faculty.objects.create(
+            institution=inst, user=user, name=name,
+            department=hod_obj.department, phone=phone,
+            qualification=qualification, email=email,
+        )
+        if course_ids:
+            faculty.courses.set(Course.objects.filter(pk__in=course_ids, institution=inst))
+        log_audit(request.user, 'add_faculty', f"Added faculty {name}", 'faculty_details')
+        messages.success(request, f'Faculty "{name}" added successfully.')
+        return redirect('core:hod_faculty')
+    return render(request, 'hod/add_faculty.html', {'courses': courses})
+
+
+# ─── HOD: MANAGE LIBRARIANS ──────────────────────────────────
+
+@login_required
+def hod_librarians(request):
+    if request.user.role != 'hod':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    librarians = User.objects.filter(institution=inst, role='librarian').order_by('username')
+    return render(request, 'hod/librarians.html', {'librarians': librarians})
+
+
+@login_required
+def hod_add_librarian(request):
+    if request.user.role != 'hod':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+
+        errors = []
+        if not name:
+            errors.append('Name is required.')
+        if not username:
+            errors.append('Username is required.')
+        if User.objects.filter(username=username).exists():
+            errors.append('Username already taken.')
+        if len(password) < 6:
+            errors.append('Password must be at least 6 characters.')
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+            return render(request, 'hod/add_librarian.html')
+
+        User.objects.create_user(
+            username=username, password=password,
+            role='librarian', institution=inst, first_name=name, phone=phone,
+        )
+        log_audit(request.user, 'add_librarian', f"Added librarian {name}", 'users')
+        messages.success(request, f'Librarian "{name}" added successfully.')
+        return redirect('core:hod_librarians')
+    return render(request, 'hod/add_librarian.html')
+
+
+# ─── FACULTY: MANAGE STUDENTS ────────────────────────────────
+
+@login_required
+def faculty_students(request):
+    if request.user.role != 'faculty':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    try:
+        faculty_obj = Faculty.objects.get(user=request.user, institution=inst)
+    except Faculty.DoesNotExist:
+        return redirect('core:dashboard')
+    my_course_ids = faculty_obj.courses.values_list('id', flat=True)
+    students = Student.objects.filter(institution=inst, course__id__in=my_course_ids).order_by('name')
+    q = request.GET.get('q', '').strip()
+    if q:
+        students = students.filter(Q(name__icontains=q) | Q(phone__icontains=q))
+    if request.method == 'POST' and request.POST.get('delete_id'):
+        sid = request.POST.get('delete_id')
+        try:
+            s = Student.objects.get(pk=sid, institution=inst, course__id__in=my_course_ids)
+            log_audit(request.user, 'delete_student', f"Deleted student {s.name}", 'student_details')
+            s.delete()
+            messages.success(request, f'Student "{s.name}" deleted.')
+        except Student.DoesNotExist:
+            messages.error(request, 'Student not found.')
+        return redirect('core:faculty_students')
+    return render(request, 'faculty/students.html', {'students': students, 'q': q, 'faculty_obj': faculty_obj})
+
+
+@login_required
+def faculty_add_student(request):
+    if request.user.role != 'faculty':
+        return redirect('core:dashboard')
+    inst = request.user.institution
+    try:
+        faculty_obj = Faculty.objects.get(user=request.user, institution=inst)
+    except Faculty.DoesNotExist:
+        return redirect('core:dashboard')
+    courses = faculty_obj.courses.all().order_by('name')
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        age = request.POST.get('age', 18)
+        sex = request.POST.get('sex', 'Male')
+        phone = request.POST.get('phone', '').strip()
+        course_id = request.POST.get('course', '')
+        year = request.POST.get('year', '').strip()
+        semester = request.POST.get('semester', '').strip()
+        class_name = request.POST.get('class_name', '').strip()
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+
+        errors = []
+        if not name:
+            errors.append('Name is required.')
+        if not phone:
+            errors.append('Phone is required.')
+        if not username:
+            errors.append('Username is required.')
+        if User.objects.filter(username=username).exists():
+            errors.append('Username already taken.')
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+            return render(request, 'faculty/add_student.html', {'courses': courses})
+
+        user = User.objects.create_user(
+            username=username, password=password,
+            role='student', institution=inst,
+        )
+        course = Course.objects.filter(pk=course_id, institution=inst).first() if course_id else None
+        Student.objects.create(
+            institution=inst, user=user, name=name,
+            age=int(age) if age else 18, sex=sex, phone=phone,
+            course=course, year=year, semester=semester, class_name=class_name,
+        )
+        log_audit(request.user, 'add_student', f"Added student {name}", 'student_details')
+        messages.success(request, f'Student "{name}" added successfully.')
+        return redirect('core:faculty_students')
+    return render(request, 'faculty/add_student.html', {'courses': courses})
 
 
 @login_required
@@ -533,7 +964,7 @@ def accountant_collections(request):
 
 @login_required
 def admin_exams(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     exams = Exam.objects.filter(institution=inst).select_related('course').order_by('-exam_date')
@@ -555,7 +986,7 @@ def admin_exams(request):
 
 @login_required
 def admin_add_exam(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     courses = Course.objects.filter(institution=inst).order_by('name')
@@ -592,7 +1023,7 @@ def admin_add_exam(request):
 
 @login_required
 def admin_exam_results(request, exam_id):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     exam = get_object_or_404(Exam, pk=exam_id, institution=inst)
@@ -706,7 +1137,7 @@ def student_exams(request):
 
 @login_required
 def admin_books(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     total_books = Book.objects.filter(institution=inst).aggregate(total=Sum('total_copies'), available=Sum('available_copies'))
@@ -965,7 +1396,7 @@ def student_library(request):
 
 @login_required
 def admin_events(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     events = Event.objects.filter(institution=inst).order_by('-start_date')
@@ -984,7 +1415,7 @@ def admin_events(request):
 
 @login_required
 def admin_add_event(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     if request.method == 'POST':
@@ -1036,7 +1467,7 @@ def student_events(request):
 
 @login_required
 def admin_settings(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     inst = request.user.institution
     return render(request, 'admin_panel/settings.html', {'inst': inst})
@@ -1044,7 +1475,7 @@ def admin_settings(request):
 
 @login_required
 def admin_regenerate_invite(request):
-    if request.user.role != 'admin':
+    if request.user.role != 'chairman':
         return redirect('core:dashboard')
     if request.method == 'POST':
         inst = request.user.institution

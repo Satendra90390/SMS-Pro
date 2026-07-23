@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}HODs - Edosaic{% endblock %}
+{% block body %}
+<div class="layout">
+    {% include 'components/director_sidebar.html' with active='hods' %}
+
+    <main class="main-content">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+        <div class="page-header">
+            <div class="header-avatar">{{ user.username.0|upper }}</div>
+            <div>
+                <h1>Heads of Department</h1>
+                <div class="subtitle">Manage all HODs in your department</div>
+            </div>
+        </div>
+
+        <div class="card-header" style="margin-bottom:8px;">
+            <form method="get" class="search-form" style="display:flex;gap:8px;flex:1;max-width:400px;">
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search HODs..." style="flex:1;">
+                <button type="submit" class="btn btn-primary btn-sm"><i data-lucide="search" style="width:16px;height:16px;"></i></button>
+            </form>
+            <a href="{% url 'core:director_add_hod' %}" class="btn btn-primary"><i data-lucide="user-plus" style="width:16px;height:16px;"></i> Add HOD</a>
+        </div>
+
+        <div class="card">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for hod in hods %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td class="td-name">
+                                <div class="user-cell">
+                                    <div class="avatar avatar-sm">{{ hod.user.username.0|upper }}</div>
+                                    {{ hod.user.get_full_name|default:hod.user.username }}
+                                </div>
+                            </td>
+                            <td>{{ hod.department|default:"-" }}</td>
+                            <td>{{ hod.phone|default:"-" }}</td>
+                            <td>{{ hod.user.email|default:"-" }}</td>
+                            <td>
+                                <form method="post" action="{% url 'core:director_hods' %}?delete={{ hod.pk }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this HOD?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">
+                                <div class="empty-state"><div class="icon"><i data-lucide="users" style="width:48px;height:48px;"></i></div><h3>No HODs found</h3></div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
