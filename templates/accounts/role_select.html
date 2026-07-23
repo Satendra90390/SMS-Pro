@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Choose Role — Edosaic{% endblock %}
+{% block title %}{% if step == '2' %}Choose Role{% else %}Verify Institution{% endif %} — Edosaic{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/auth.css' %}?v=3">{% endblock %}
 {% block body %}
 <nav class="auth-nav">
@@ -13,10 +13,6 @@
 <div class="auth-page role-select-page">
     <div class="auth-form-panel" style="width:100%;max-width:520px;padding:48px 40px;">
         <div class="auth-card">
-            <div class="auth-card-header" style="text-align:center;">
-                <h1>Choose Your Role</h1>
-                <p class="subtitle">How will you be using Edosaic?</p>
-            </div>
 
             {% if messages %}
             <div style="margin-bottom:16px;">
@@ -26,48 +22,80 @@
             </div>
             {% endif %}
 
+            {% if step == '1' %}
+            <!-- STEP 1: Enter Invite Code -->
+            <div class="auth-card-header" style="text-align:center;">
+                <div class="step-icon"><i data-lucide="key-round" style="width:28px;height:28px;"></i></div>
+                <h1>Verify Your Institution</h1>
+                <p class="subtitle">Enter the invite code provided by your institution admin.</p>
+            </div>
+
+            <form method="post" class="auth-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="verify_code">
+                <div class="form-group">
+                    <label>Invite Code</label>
+                    <div class="input-wrap">
+                        <input type="text" name="invite_code" placeholder="e.g. ABCD1234" style="text-transform:uppercase;letter-spacing:2px;font-size:16px;text-align:center;" maxlength="10" required autofocus>
+                        <span class="input-icon"><i data-lucide="key-round" style="width:18px;height:18px;"></i></span>
+                    </div>
+                    <span class="field-hint">Ask your institution admin for the invite code.</span>
+                </div>
+                <button type="submit" class="auth-submit">Verify <i data-lucide="check-circle" style="width:18px;height:18px;"></i></button>
+            </form>
+
+            {% elif step == '2' %}
+            <!-- STEP 2: Institution Confirmed → Pick Role -->
+            <div class="auth-card-header" style="text-align:center;">
+                <div class="step-icon step-icon-success"><i data-lucide="check-circle" style="width:28px;height:28px;"></i></div>
+                <h1>Institution Verified</h1>
+                <p class="subtitle">You're joining <strong>{{ institution.name }}</strong>. Now pick your role.</p>
+            </div>
+
+            <div class="inst-confirmed">
+                <div class="inst-confirmed-icon"><i data-lucide="building-2" style="width:20px;height:20px;"></i></div>
+                <div>
+                    <div class="inst-confirmed-name">{{ institution.name }}</div>
+                    <div class="inst-confirmed-type">{{ institution.inst_type }}</div>
+                </div>
+            </div>
+
             <form method="post" class="auth-form" id="role-form">
                 {% csrf_token %}
-                <input type="hidden" name="role" id="selected-role" value="{{ role|default:'' }}">
+                <input type="hidden" name="action" value="pick_role">
+                <input type="hidden" name="role" id="selected-role" value="">
 
                 <div class="role-grid">
-                    <label class="role-card" onclick="selectRole('admin')">
-                        <div class="role-card-inner {% if role == 'admin' %}selected{% endif %}" data-role="admin">
-                            <div class="role-icon"><i data-lucide="shield" style="width:28px;height:28px;"></i></div>
-                            <strong>Admin</strong>
-                            <span>Register your institution</span>
-                        </div>
-                    </label>
-                    <label class="role-card" onclick="selectRole('accountant')">
-                        <div class="role-card-inner {% if role == 'accountant' %}selected{% endif %}" data-role="accountant">
-                            <div class="role-icon"><i data-lucide="wallet" style="width:28px;height:28px;"></i></div>
-                            <strong>Accountant</strong>
-                            <span>Manage fees & payments</span>
-                        </div>
-                    </label>
-                    <label class="role-card" onclick="selectRole('faculty')">
-                        <div class="role-card-inner {% if role == 'faculty' %}selected{% endif %}" data-role="faculty">
-                            <div class="role-icon"><i data-lucide="book-open" style="width:28px;height:28px;"></i></div>
-                            <strong>Faculty</strong>
-                            <span>Teach & manage students</span>
-                        </div>
-                    </label>
                     <label class="role-card" onclick="selectRole('student')">
-                        <div class="role-card-inner {% if role == 'student' %}selected{% endif %}" data-role="student">
+                        <div class="role-card-inner" data-role="student">
                             <div class="role-icon"><i data-lucide="graduation-cap" style="width:28px;height:28px;"></i></div>
                             <strong>Student</strong>
                             <span>Access courses & results</span>
                         </div>
                     </label>
+                    <label class="role-card" onclick="selectRole('faculty')">
+                        <div class="role-card-inner" data-role="faculty">
+                            <div class="role-icon"><i data-lucide="book-open" style="width:28px;height:28px;"></i></div>
+                            <strong>Faculty</strong>
+                            <span>Teach & manage students</span>
+                        </div>
+                    </label>
                     <label class="role-card" onclick="selectRole('parent')">
-                        <div class="role-card-inner {% if role == 'parent' %}selected{% endif %}" data-role="parent">
+                        <div class="role-card-inner" data-role="parent">
                             <div class="role-icon"><i data-lucide="heart" style="width:28px;height:28px;"></i></div>
                             <strong>Parent</strong>
                             <span>Monitor your child's progress</span>
                         </div>
                     </label>
+                    <label class="role-card" onclick="selectRole('accountant')">
+                        <div class="role-card-inner" data-role="accountant">
+                            <div class="role-icon"><i data-lucide="wallet" style="width:28px;height:28px;"></i></div>
+                            <strong>Accountant</strong>
+                            <span>Manage fees & payments</span>
+                        </div>
+                    </label>
                     <label class="role-card" onclick="selectRole('librarian')">
-                        <div class="role-card-inner {% if role == 'librarian' %}selected{% endif %}" data-role="librarian">
+                        <div class="role-card-inner" data-role="librarian">
                             <div class="role-icon"><i data-lucide="library" style="width:28px;height:28px;"></i></div>
                             <strong>Librarian</strong>
                             <span>Manage library books</span>
@@ -75,36 +103,64 @@
                     </label>
                 </div>
 
-                <!-- Institution fields for non-admin roles -->
-                <div id="inst-fields" class="inst-fields {% if not role or role == 'admin' %}hidden{% endif %}">
-                    <div class="form-group" style="margin-top:20px;">
-                        <label>Institution Name</label>
-                        <div class="input-wrap">
-                            <input type="text" name="inst_name" id="inst-name" placeholder="Enter your institution name" value="{{ inst_name|default:'' }}">
-                            <span class="input-icon"><i data-lucide="building-2" style="width:18px;height:18px;"></i></span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Invite Code</label>
-                        <div class="input-wrap">
-                            <input type="text" name="invite_code" id="invite-code" placeholder="Enter code from your admin" style="text-transform:uppercase;" maxlength="10">
-                            <span class="input-icon"><i data-lucide="key-round" style="width:18px;height:18px;"></i></span>
-                        </div>
-                        <span class="field-hint">Ask your institution admin for the invite code.</span>
-                    </div>
+                <div style="display:flex;gap:10px;margin-top:24px;">
+                    <form method="post" style="flex:0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="back">
+                        <button type="submit" class="auth-submit" style="background:var(--bg-secondary);border:1.5px solid var(--border-default);color:var(--text-secondary);padding:12px 20px;">
+                            <i data-lucide="arrow-left" style="width:18px;height:18px;"></i> Back
+                        </button>
+                    </form>
+                    <button type="submit" class="auth-submit" style="flex:1;" id="submit-btn" disabled>
+                        Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
+                    </button>
                 </div>
-
-                <button type="submit" class="auth-submit" style="margin-top:24px;" id="submit-btn">
-                    {% if role == 'admin' %}Register Institution{% else %}Continue{% endif %}
-                    <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>
-                </button>
             </form>
+
+            {% endif %}
         </div>
     </div>
 </div>
 
 <style>
 .role-select-page { display:flex; align-items:center; justify-content:center; }
+.step-icon {
+    width: 64px; height: 64px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 16px;
+    background: var(--brand-bg);
+    color: var(--brand-text);
+    margin: 0 auto 20px;
+    box-shadow: 0 4px 20px var(--brand-glow);
+}
+.step-icon-success {
+    background: rgba(34,197,94,0.1);
+    color: #22c55e;
+    box-shadow: 0 4px 20px rgba(34,197,94,0.2);
+}
+.field-hint { display: block; font-size: 11px; color: var(--text-tertiary); margin-top: 6px; }
+
+.inst-confirmed {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: rgba(34,197,94,0.06);
+    border: 1px solid rgba(34,197,94,0.2);
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+.inst-confirmed-icon {
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    background: rgba(34,197,94,0.1);
+    color: #22c55e;
+    flex-shrink: 0;
+}
+.inst-confirmed-name { font-weight: 600; font-size: 15px; color: var(--text-primary); }
+.inst-confirmed-type { font-size: 12px; color: var(--text-tertiary); }
+
 .role-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -139,37 +195,18 @@
 }
 .role-card-inner strong { font-size: 14px; color: var(--text-primary); }
 .role-card-inner span { font-size: 12px; color: var(--text-tertiary); }
-.inst-fields { transition: all .3s ease; }
-.inst-fields.hidden { display: none; }
-.field-hint { display: block; font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
 </style>
 
 <script>
 function selectRole(role) {
     document.getElementById('selected-role').value = role;
-    var instFields = document.getElementById('inst-fields');
-    var submitBtn = document.getElementById('submit-btn');
-
     document.querySelectorAll('.role-card-inner').forEach(function(el) {
         el.classList.remove('selected');
     });
     event.currentTarget.querySelector('.role-card-inner').classList.add('selected');
-
-    if (role === 'admin') {
-        instFields.classList.add('hidden');
-        submitBtn.innerHTML = 'Register Institution <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>';
-    } else {
-        instFields.classList.remove('hidden');
-        submitBtn.innerHTML = 'Continue <i data-lucide="arrow-right" style="width:18px;height:18px;"></i>';
-    }
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+    document.getElementById('submit-btn').disabled = false;
 }
-
 document.addEventListener('DOMContentLoaded', function() {
-    var currentRole = document.getElementById('selected-role').value;
-    if (currentRole && currentRole !== 'admin') {
-        document.getElementById('inst-fields').classList.remove('hidden');
-    }
     if (typeof lucide !== 'undefined') lucide.createIcons();
 });
 </script>

@@ -65,33 +65,43 @@ def role_select(request):
     if not request.session.pop('oauth_new', False):
         return redirect('core:dashboard')
 
+    step = request.session.get('role_select_step', '1')
+    inst_id = request.session.get('role_select_inst_id')
+
     if request.method == 'POST':
-        role = request.POST.get('role', '').strip()
+        action = request.POST.get('action', '')
 
-        if role == 'admin':
-            return redirect('accounts:register')
-
-        if role in ['accountant', 'faculty', 'student', 'parent', 'librarian']:
+        if action == 'verify_code':
             invite_code = request.POST.get('invite_code', '').strip().upper()
-            inst_name = request.POST.get('inst_name', '').strip()
-
-            if not inst_name:
-                messages.error(request, 'Please enter your institution name.')
-                return render(request, 'accounts/role_select.html', {'role': role, 'inst_name': inst_name})
             if not invite_code:
                 messages.error(request, 'Please enter the invite code from your admin.')
-                return render(request, 'accounts/role_select.html', {'role': role, 'inst_name': inst_name})
-
+                return render(request, 'accounts/role_select.html', {'step': '1'})
             try:
-                institution = Institution.objects.get(
-                    invite_code=invite_code,
-                    name__iexact=inst_name,
-                    is_active=True,
-                )
+                institution = Institution.objects.get(invite_code=invite_code, is_active=True)
             except Institution.DoesNotExist:
-                messages.error(request, 'Invalid institution name or invite code. Please check with your admin.')
-                return render(request, 'accounts/role_select.html', {'role': role, 'inst_name': inst_name})
+                messages.error(request, 'Invalid invite code. Please check with your admin.')
+                return render(request, 'accounts/role_select.html', {'step': '1'})
+            request.session['role_select_step'] = '2'
+            request.session['role_select_inst_id'] = institution.id
+            return render(request, 'accounts/role_select.html', {
+                'step': '2', 'institution': institution,
+            })
 
+        if action == 'pick_role':
+            role = request.POST.get('role', '').strip()
+            if role == 'admin':
+                request.session.pop('role_select_step', None)
+                request.session.pop('role_select_inst_id', None)
+                return redirect('accounts:register')
+
+            if role not in ['accountant', 'faculty', 'student', 'parent', 'librarian']:
+                messages.error(request, 'Please select a valid role.')
+                institution = get_object_or_404(Institution, pk=inst_id)
+                return render(request, 'accounts/role_select.html', {
+                    'step': '2', 'institution': institution,
+                })
+
+            institution = get_object_or_404(Institution, pk=inst_id)
             user.role = role
             user.institution = institution
             user.save()
@@ -103,11 +113,23 @@ def role_select(request):
             elif role == 'parent':
                 Parent.objects.get_or_create(user=user, institution=institution, defaults={'full_name': user.get_full_name() or user.username})
 
+            request.session.pop('role_select_step', None)
+            request.session.pop('role_select_inst_id', None)
             messages.success(request, f'Welcome! You are registered as {role.title()} at {institution.name}.')
             return redirect('core:dashboard')
 
-        messages.error(request, 'Please select a valid role.')
-    return render(request, 'accounts/role_select.html')
+        if action == 'back':
+            request.session['role_select_step'] = '1'
+            request.session.pop('role_select_inst_id', None)
+            return render(request, 'accounts/role_select.html', {'step': '1'})
+
+    if step == '2' and inst_id:
+        institution = get_object_or_404(Institution, pk=inst_id)
+        return render(request, 'accounts/role_select.html', {
+            'step': '2', 'institution': institution,
+        })
+
+    return render(request, 'accounts/role_select.html', {'step': '1'})
 
 
 @ratelimit(key='ip', rate='3/m', method='POST', block=True)
