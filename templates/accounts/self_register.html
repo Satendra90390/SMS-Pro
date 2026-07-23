@@ -215,9 +215,6 @@
                 <input type="hidden" name="invite_code" value="{{ invite_code }}">
                 <input type="hidden" name="inst_id" value="{{ inst_id }}">
                 <input type="hidden" name="role" value="{{ role }}">
-                <input type="hidden" name="full_name" value="{{ full_name }}">
-                <input type="hidden" name="username" value="{{ username }}">
-                <input type="hidden" name="phone" value="{{ phone }}">
                 <div id="signup-step3">
                     <div class="form-section">
                         <div class="form-section-title">
@@ -229,14 +226,14 @@
                     <div class="form-section" style="margin-top:0;">
                         <div class="form-section-title">
                             <div class="section-icon"><i data-lucide="user-circle" style="width:22px;height:22px;"></i></div>
-                            Account Credentials
+                            Account Details
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label>Full Name <span style="color:#ef4444;">*</span></label>
                         <div class="input-wrap">
-                            <input type="text" value="{{ full_name }}" disabled>
+                            <input type="text" name="full_name" placeholder="Enter your full name" required>
                             <span class="input-icon"><i data-lucide="user" style="width:18px;height:18px;"></i></span>
                         </div>
                     </div>
@@ -244,8 +241,16 @@
                     <div class="form-group">
                         <label>Username <span style="color:#ef4444;">*</span></label>
                         <div class="input-wrap">
-                            <input type="text" value="{{ username }}" disabled>
+                            <input type="text" name="username" placeholder="Choose a username" required>
                             <span class="input-icon"><i data-lucide="at-sign" style="width:18px;height:18px;"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <div class="input-wrap">
+                            <input type="tel" name="phone" placeholder="Phone number (optional)">
+                            <span class="input-icon"><i data-lucide="phone" style="width:18px;height:18px;"></i></span>
                         </div>
                     </div>
 

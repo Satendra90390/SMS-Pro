@@ -107,11 +107,9 @@ def role_select(request):
             user.save()
 
             if role == 'student':
-                Student.objects.get_or_create(user=user, institution=institution, defaults={'full_name': user.get_full_name() or user.username})
+                Student.objects.get_or_create(user=user, institution=institution, defaults={'name': user.get_full_name() or user.username, 'age': 18, 'sex': 'Other', 'phone': user.phone or ''})
             elif role == 'faculty':
-                Faculty.objects.get_or_create(user=user, institution=institution, defaults={'full_name': user.get_full_name() or user.username})
-            elif role == 'parent':
-                Parent.objects.get_or_create(user=user, institution=institution, defaults={'full_name': user.get_full_name() or user.username})
+                Faculty.objects.get_or_create(user=user, institution=institution, defaults={'name': user.get_full_name() or user.username, 'department': '', 'phone': user.phone or '', 'qualification': ''})
 
             request.session.pop('role_select_step', None)
             request.session.pop('role_select_inst_id', None)
@@ -270,41 +268,10 @@ def self_register(request):
                     'step': '2', 'institution': institution,
                     'inst_id': inst_id, 'invite_code': invite_code,
                 })
-            if not full_name:
-                messages.error(request, 'Full name is required.')
-                return render(request, 'accounts/self_register.html', {
-                    'step': '2', 'institution': institution,
-                    'inst_id': inst_id, 'invite_code': invite_code,
-                })
-            if not username:
-                messages.error(request, 'Username is required.')
-                return render(request, 'accounts/self_register.html', {
-                    'step': '2', 'institution': institution,
-                    'inst_id': inst_id, 'invite_code': invite_code,
-                })
-            if User.objects.filter(username=username).exists():
-                messages.error(request, 'Username already taken.')
-                return render(request, 'accounts/self_register.html', {
-                    'step': '2', 'institution': institution,
-                    'inst_id': inst_id, 'invite_code': invite_code,
-                })
-            if len(password) < 6:
-                messages.error(request, 'Password must be at least 6 characters.')
-                return render(request, 'accounts/self_register.html', {
-                    'step': '2', 'institution': institution,
-                    'inst_id': inst_id, 'invite_code': invite_code,
-                })
-            if password != confirm:
-                messages.error(request, 'Passwords do not match.')
-                return render(request, 'accounts/self_register.html', {
-                    'step': '2', 'institution': institution,
-                    'inst_id': inst_id, 'invite_code': invite_code,
-                })
             return render(request, 'accounts/self_register.html', {
                 'step': '3', 'institution': institution,
                 'inst_id': inst_id, 'invite_code': invite_code,
-                'role': role, 'full_name': full_name,
-                'username': username, 'phone': phone,
+                'role': role,
             })
 
         elif step == '3':
@@ -325,9 +292,46 @@ def self_register(request):
             if role not in ['student', 'faculty', 'parent', 'accountant', 'librarian']:
                 messages.error(request, 'Invalid role.')
                 return redirect('accounts:self_register')
-            if not full_name or not username or not password:
-                messages.error(request, 'Missing required fields.')
-                return redirect('accounts:self_register')
+            if not full_name:
+                messages.error(request, 'Full name is required.')
+                return render(request, 'accounts/self_register.html', {
+                    'step': '3', 'institution': institution,
+                    'inst_id': inst_id, 'invite_code': invite_code,
+                    'role': role, 'full_name': full_name,
+                    'username': username, 'phone': phone,
+                })
+            if not username:
+                messages.error(request, 'Username is required.')
+                return render(request, 'accounts/self_register.html', {
+                    'step': '3', 'institution': institution,
+                    'inst_id': inst_id, 'invite_code': invite_code,
+                    'role': role, 'full_name': full_name,
+                    'username': username, 'phone': phone,
+                })
+            if User.objects.filter(username=username).exists():
+                messages.error(request, 'Username already taken.')
+                return render(request, 'accounts/self_register.html', {
+                    'step': '3', 'institution': institution,
+                    'inst_id': inst_id, 'invite_code': invite_code,
+                    'role': role, 'full_name': full_name,
+                    'username': username, 'phone': phone,
+                })
+            if len(password) < 6:
+                messages.error(request, 'Password must be at least 6 characters.')
+                return render(request, 'accounts/self_register.html', {
+                    'step': '3', 'institution': institution,
+                    'inst_id': inst_id, 'invite_code': invite_code,
+                    'role': role, 'full_name': full_name,
+                    'username': username, 'phone': phone,
+                })
+            if password != confirm:
+                messages.error(request, 'Passwords do not match.')
+                return render(request, 'accounts/self_register.html', {
+                    'step': '3', 'institution': institution,
+                    'inst_id': inst_id, 'invite_code': invite_code,
+                    'role': role, 'full_name': full_name,
+                    'username': username, 'phone': phone,
+                })
 
             user = User.objects.create_user(
                 username=username, password=password,
