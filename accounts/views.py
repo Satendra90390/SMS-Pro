@@ -47,6 +47,10 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            if not request.POST.get('remember'):
+                request.session.set_expiry(0)
+            else:
+                request.session.set_expiry(1209600)
             return redirect('core:dashboard')
         else:
             messages.error(request, 'Invalid username or password.')
