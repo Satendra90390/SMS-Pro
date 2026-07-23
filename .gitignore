@@ -5,3 +5,5 @@ staticfiles/
 media/
 .env
 *.log
+
+seed.py
