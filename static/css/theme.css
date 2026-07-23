@@ -248,20 +248,12 @@
     transform: scale(1.1);
 }
 .theme-toggle .icon-sun, .theme-toggle .icon-moon { display: none; }
-.theme-toggle-nav .icon-sun, .theme-toggle-nav .icon-moon { display: block; opacity: 0; pointer-events: none; transform: scale(0.5); }
 [data-theme="dark"] .theme-toggle .icon-sun { display: block; }
-[data-theme="dark"] .theme-toggle-nav .icon-sun { display: block; opacity: 1; transform: scale(1); }
-[data-theme="dark"] .theme-toggle-nav .icon-moon { display: block; opacity: 0; transform: rotate(90deg) scale(0.5); }
 [data-theme="light"] .theme-toggle .icon-moon { display: block; }
-[data-theme="light"] .theme-toggle-nav .icon-moon { display: block; opacity: 1; transform: scale(1); }
-[data-theme="light"] .theme-toggle-nav .icon-sun { display: block; opacity: 0; transform: rotate(-90deg) scale(0.5); }
-:root:not([data-theme]) .theme-toggle .icon-moon,
-:root:not([data-theme]) .theme-toggle-nav .icon-moon { display: block; }
+:root:not([data-theme]) .theme-toggle .icon-moon { display: block; }
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme]) .theme-toggle .icon-sun { display: block; }
-    :root:not([data-theme]) .theme-toggle-nav .icon-sun { display: block; }
     :root:not([data-theme]) .theme-toggle .icon-moon { display: none; }
-    :root:not([data-theme]) .theme-toggle-nav .icon-moon { display: block; opacity: 0; }
 }
 
 /* ══════════════════════════════════════════════════════════════
