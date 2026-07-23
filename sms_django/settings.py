@@ -149,12 +149,4 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': ['profile', 'email'],
         'AUTH_PARAMS': {'access_type': 'online', 'prompt': 'select_account'},
     },
-    'github': {
-        'APP': {
-            'client_id': os.getenv('GITHUB_CLIENT_ID', ''),
-            'secret': os.getenv('GITHUB_CLIENT_SECRET', ''),
-            'key': '',
-        },
-        'SCOPE': ['user:email'],
-    }
 }
