@@ -40,12 +40,12 @@
                             <td>{{ forloop.counter }}</td>
                             <td class="td-name">
                                 <div class="user-cell">
-                                    <div class="avatar avatar-sm">{{ accountant.user.username.0|upper }}</div>
-                                    {{ accountant.user.get_full_name|default:accountant.user.username }}
+                                    <div class="avatar avatar-sm">{{ accountant.username.0|upper }}</div>
+                                    {{ accountant.get_full_name|default:accountant.username }}
                                 </div>
                             </td>
                             <td>{{ accountant.phone|default:"-" }}</td>
-                            <td>{{ accountant.user.username }}</td>
+                            <td>{{ accountant.username }}</td>
                             <td>
                                 <form method="post" action="{% url 'core:chairman_accountants' %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this accountant?');">
                                     {% csrf_token %}

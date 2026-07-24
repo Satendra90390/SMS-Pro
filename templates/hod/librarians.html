@@ -40,12 +40,12 @@
                             <td>{{ forloop.counter }}</td>
                             <td class="td-name">
                                 <div class="user-cell">
-                                    <div class="avatar avatar-sm">{{ librarian.user.username.0|upper }}</div>
-                                    {{ librarian.user.get_full_name|default:librarian.user.username }}
+                                    <div class="avatar avatar-sm">{{ librarian.username.0|upper }}</div>
+                                    {{ librarian.get_full_name|default:librarian.username }}
                                 </div>
                             </td>
                             <td>{{ librarian.phone|default:"-" }}</td>
-                            <td>{{ librarian.user.username }}</td>
+                            <td>{{ librarian.username }}</td>
                             <td>
                                 <form method="post" action="{% url 'core:hod_librarians' %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this librarian?');">
                                     {% csrf_token %}

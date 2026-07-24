@@ -529,6 +529,9 @@ def chairman_accountants(request):
         return redirect('core:dashboard')
     inst = request.user.institution
     accountants = User.objects.filter(institution=inst, role='accountant').order_by('username')
+    q = request.GET.get('q', '').strip()
+    if q:
+        accountants = accountants.filter(Q(username__icontains=q) | Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(phone__icontains=q))
     if request.method == 'POST' and request.POST.get('delete_id'):
         uid = request.POST.get('delete_id')
         try:
@@ -539,7 +542,7 @@ def chairman_accountants(request):
         except User.DoesNotExist:
             messages.error(request, 'Accountant not found.')
         return redirect('core:chairman_accountants')
-    return render(request, 'chairman/accountants.html', {'accountants': accountants})
+    return render(request, 'chairman/accountants.html', {'accountants': accountants, 'institution': inst})
 
 
 @login_required
@@ -744,6 +747,9 @@ def hod_librarians(request):
         return redirect('core:dashboard')
     inst = request.user.institution
     librarians = User.objects.filter(institution=inst, role='librarian').order_by('username')
+    q = request.GET.get('q', '').strip()
+    if q:
+        librarians = librarians.filter(Q(username__icontains=q) | Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(phone__icontains=q))
     if request.method == 'POST' and request.POST.get('delete_id'):
         uid = request.POST.get('delete_id')
         try:
@@ -754,7 +760,7 @@ def hod_librarians(request):
         except User.DoesNotExist:
             messages.error(request, 'Librarian not found.')
         return redirect('core:hod_librarians')
-    return render(request, 'hod/librarians.html', {'librarians': librarians})
+    return render(request, 'hod/librarians.html', {'librarians': librarians, 'institution': inst})
 
 
 @login_required
