@@ -75,8 +75,9 @@
                             <td><span class="badge badge-purple">{{ student.semester|default:"-" }}</span></td>
                             <td>{{ student.phone|default:"-" }}</td>
                             <td>
-                                <form method="post" action="{% url 'core:faculty_students' %}?delete={{ student.pk }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to remove this student?');">
+                                <form method="post" action="{% url 'core:faculty_students' %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to remove this student?');">
                                     {% csrf_token %}
+                                    <input type="hidden" name="delete_id" value="{{ student.pk }}">
                                     <button type="submit" class="btn btn-danger btn-sm"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
                                 </form>
                             </td>

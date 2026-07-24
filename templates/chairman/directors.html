@@ -49,8 +49,9 @@
                             <td>{{ director.phone|default:"-" }}</td>
                             <td>{{ director.user.email|default:"-" }}</td>
                             <td>
-                                <form method="post" action="{% url 'core:chairman_directors' %}?delete={{ director.pk }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this director?');">
+                                <form method="post" action="{% url 'core:chairman_directors' %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this director?');">
                                     {% csrf_token %}
+                                    <input type="hidden" name="delete_id" value="{{ director.pk }}">
                                     <button type="submit" class="btn btn-danger btn-sm"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
                                 </form>
                             </td>

@@ -47,8 +47,9 @@
                             <td>{{ accountant.phone|default:"-" }}</td>
                             <td>{{ accountant.user.username }}</td>
                             <td>
-                                <form method="post" action="{% url 'core:chairman_accountants' %}?delete={{ accountant.pk }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this accountant?');">
+                                <form method="post" action="{% url 'core:chairman_accountants' %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this accountant?');">
                                     {% csrf_token %}
+                                    <input type="hidden" name="delete_id" value="{{ accountant.pk }}">
                                     <button type="submit" class="btn btn-danger btn-sm"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
                                 </form>
                             </td>

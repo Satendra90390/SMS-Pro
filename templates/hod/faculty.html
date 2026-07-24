@@ -36,7 +36,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for member in faculty %}
+                        {% for member in faculty_list %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
                             <td class="td-name">
@@ -49,8 +49,9 @@
                             <td>{{ member.phone|default:"-" }}</td>
                             <td>{{ member.user.email|default:"-" }}</td>
                             <td>
-                                <form method="post" action="{% url 'core:hod_faculty' %}?delete={{ member.pk }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this faculty member?');">
+                                <form method="post" action="{% url 'core:hod_faculty' %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this faculty member?');">
                                     {% csrf_token %}
+                                    <input type="hidden" name="delete_id" value="{{ member.pk }}">
                                     <button type="submit" class="btn btn-danger btn-sm"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
                                 </form>
                             </td>

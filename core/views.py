@@ -23,7 +23,7 @@ def log_audit(user, action, details="", collection=""):
 def dashboard_router(request):
     role = request.user.role
     if role == 'chairman':
-        return redirect('core:chairman_dashboard')
+        return redirect('core:admin_dashboard')
     elif role == 'director':
         return redirect('core:director_dashboard')
     elif role == 'hod':
@@ -520,6 +520,16 @@ def chairman_accountants(request):
         return redirect('core:dashboard')
     inst = request.user.institution
     accountants = User.objects.filter(institution=inst, role='accountant').order_by('username')
+    if request.method == 'POST' and request.POST.get('delete_id'):
+        uid = request.POST.get('delete_id')
+        try:
+            u = User.objects.get(pk=uid, institution=inst, role='accountant')
+            log_audit(request.user, 'delete_accountant', f"Deleted accountant {u.username}", 'users')
+            u.delete()
+            messages.success(request, f'Accountant "{u.username}" deleted.')
+        except User.DoesNotExist:
+            messages.error(request, 'Accountant not found.')
+        return redirect('core:chairman_accountants')
     return render(request, 'chairman/accountants.html', {'accountants': accountants})
 
 
@@ -725,6 +735,16 @@ def hod_librarians(request):
         return redirect('core:dashboard')
     inst = request.user.institution
     librarians = User.objects.filter(institution=inst, role='librarian').order_by('username')
+    if request.method == 'POST' and request.POST.get('delete_id'):
+        uid = request.POST.get('delete_id')
+        try:
+            u = User.objects.get(pk=uid, institution=inst, role='librarian')
+            log_audit(request.user, 'delete_librarian', f"Deleted librarian {u.username}", 'users')
+            u.delete()
+            messages.success(request, f'Librarian "{u.username}" deleted.')
+        except User.DoesNotExist:
+            messages.error(request, 'Librarian not found.')
+        return redirect('core:hod_librarians')
     return render(request, 'hod/librarians.html', {'librarians': librarians})
 
 
