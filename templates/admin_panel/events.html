@@ -20,9 +20,11 @@
             </div>
         </div>
 
+        {% if user.role != 'chairman' %}
         <div class="quick-actions">
             <a href="{% url 'core:admin_add_event' %}" class="quick-action-btn" style="background:var(--brand);color:white;"><i data-lucide="plus" style="width:18px;height:18px;"></i> Add Event</a>
         </div>
+        {% endif %}
 
         <div class="card">
             <div class="card-header">
@@ -31,7 +33,7 @@
             {% if events %}
             <div class="table-wrap">
                 <table class="data-table">
-                    <thead><tr><th>Title</th><th>Type</th><th>Start</th><th>End</th><th>Venue</th><th>Action</th></tr></thead>
+                    <thead><tr><th>Title</th><th>Type</th><th>Start</th><th>End</th><th>Venue</th>{% if user.role != 'chairman' %}<th>Action</th>{% endif %}</tr></thead>
                     <tbody>
                     {% for e in events %}
                     <tr>
@@ -40,6 +42,7 @@
                         <td>{{ e.start_date }}</td>
                         <td>{{ e.end_date }}</td>
                         <td>{{ e.venue|default:"—" }}</td>
+                        {% if user.role != 'chairman' %}
                         <td>
                             <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this event?');">
                                 {% csrf_token %}
@@ -47,6 +50,7 @@
                                 <button class="btn btn-sm btn-danger">Delete</button>
                             </form>
                         </td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                     </tbody>

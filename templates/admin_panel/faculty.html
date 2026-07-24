@@ -9,15 +9,17 @@
         <div class="page-header">
             <div class="header-avatar">{{ user.username.0|upper }}</div>
             <div>
-                <h1>Manage Faculty</h1>
-                <div class="subtitle">View and manage all faculty members</div>
+                <h1>{% if user.role == 'chairman' %}Faculty{% else %}Manage Faculty{% endif %}</h1>
+                <div class="subtitle">{% if user.role == 'chairman' %}View all faculty members{% else %}View and manage all faculty members{% endif %}</div>
             </div>
         </div>
 
         <div class="card">
             <div class="card-header">
                 <div class="card-title"><span class="dot" style="background:#34d399;"></span> All Faculty</div>
+                {% if user.role != 'chairman' %}
                 <a href="{% url 'core:admin_add_faculty' %}" class="btn btn-primary btn-sm"><i data-lucide="user-plus" style="width:14px;height:14px;"></i> Add Faculty</a>
+                {% endif %}
             </div>
             <div class="table-wrap">
                 <table>

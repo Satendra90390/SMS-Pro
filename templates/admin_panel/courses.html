@@ -20,9 +20,11 @@
             </div>
         </div>
 
+        {% if user.role != 'chairman' %}
         <div class="quick-actions">
             <a href="{% url 'core:admin_add_course' %}" class="quick-action-btn" style="background:var(--brand);color:white;"><i data-lucide="plus" style="width:18px;height:18px;"></i> Add {% if institution.inst_type == 'School' %}Class{% else %}Course{% endif %}</a>
         </div>
+        {% endif %}
 
         <div class="card">
             <div class="card-header">
@@ -52,11 +54,13 @@
                             <a href="{% url 'core:admin_branches' course_id=c.id %}" class="btn btn-sm btn-primary">Branches</a>
                             {% endif %}
                             <a href="{% url 'core:admin_subjects_manage' course_id=c.id %}" class="btn btn-sm btn-secondary">Subjects</a>
+                            {% if user.role != 'chairman' %}
                             <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this {% if institution.inst_type == 'School' %}class{% else %}course{% endif %}?');">
                                 {% csrf_token %}
                                 <input type="hidden" name="delete_id" value="{{ c.id }}">
                                 <button class="btn btn-sm btn-danger">Delete</button>
                             </form>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}

@@ -19,9 +19,6 @@
         <a href="{% url 'core:chairman_accountants' %}" {% if active == 'accountants' %}class="active"{% endif %}><span class="icon"><i data-lucide="wallet" style="width:18px;height:18px;"></i></span> Accountants</a>
         <a href="{% url 'core:chairman_add_accountant' %}" {% if active == 'add_accountant' %}class="active"{% endif %}><span class="icon"><i data-lucide="user-plus" style="width:18px;height:18px;"></i></span> Add Accountant</a>
 
-        <a href="{% url 'core:admin_students' %}" {% if active == 'students' %}class="active"{% endif %}><span class="icon"><i data-lucide="graduation-cap" style="width:18px;height:18px;"></i></span> Manage Students</a>
-        <a href="{% url 'core:admin_faculty' %}" {% if active == 'faculty' %}class="active"{% endif %}><span class="icon"><i data-lucide="users" style="width:18px;height:18px;"></i></span> Manage Faculty</a>
-
         {% if institution.inst_type == 'School' %}
         <a href="{% url 'core:admin_courses' %}" {% if active == 'courses' %}class="active"{% endif %}><span class="icon"><i data-lucide="book-open" style="width:18px;height:18px;"></i></span> Classes</a>
         {% elif institution.inst_type == 'Coaching' %}
@@ -30,7 +27,6 @@
         <a href="{% url 'core:admin_courses' %}" {% if active == 'courses' %}class="active"{% endif %}><span class="icon"><i data-lucide="book-open" style="width:18px;height:18px;"></i></span> {% if institution.inst_type == 'University' %}Departments & Courses{% else %}Courses{% endif %}</a>
         {% endif %}
 
-        <a href="{% url 'core:admin_subjects' %}" {% if active == 'subjects' %}class="active"{% endif %}><span class="icon"><i data-lucide="layers" style="width:18px;height:18px;"></i></span> Faculty Assignments</a>
         <a href="{% url 'core:admin_exams' %}" {% if active == 'exams' %}class="active"{% endif %}><span class="icon"><i data-lucide="clipboard-check" style="width:18px;height:18px;"></i></span> Exams</a>
         <a href="{% url 'core:admin_fees' %}" {% if active == 'fees' %}class="active"{% endif %}><span class="icon"><i data-lucide="indian-rupee" style="width:18px;height:18px;"></i></span> Fees</a>
         <a href="{% url 'core:admin_books' %}" {% if active == 'books' %}class="active"{% endif %}><span class="icon"><i data-lucide="library" style="width:18px;height:18px;"></i></span> Library</a>

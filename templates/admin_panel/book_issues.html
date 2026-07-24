@@ -13,9 +13,11 @@
             </div>
         </div>
 
+        {% if user.role != 'chairman' %}
         <div class="quick-actions">
             <a href="{% url 'core:admin_issue_book' %}" class="quick-action-btn" style="background:var(--brand);color:white;"><i data-lucide="plus" style="width:18px;height:18px;"></i> Issue Book</a>
         </div>
+        {% endif %}
 
         <div class="card">
             <div class="card-header">
@@ -44,6 +46,7 @@
                             {% elif i.status == 'Returned' %}<span class="badge badge-green">{{ i.status }}</span>
                             {% else %}<span class="badge badge-red">{{ i.status }}</span>{% endif %}
                         </td>
+                        {% if user.role != 'chairman' %}
                         <td>
                             {% if i.status == 'Issued' %}
                             <form method="POST" style="display:inline;">
@@ -53,6 +56,7 @@
                             </form>
                             {% endif %}
                         </td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                     </tbody>
